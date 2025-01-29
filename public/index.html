@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Finance - Controle Financeiro</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<div class="wrapper">
+		<!-- Sidebar -->
+		<aside class="sidebar">
+			<div class="sidebar-header">
+				<i class="fas fa-wallet"></i>
+				<h1>Finance</h1>
+			</div>
+			<nav class="sidebar-nav">
+				<a href="#" class="nav-item active" data-page="dashboard">
+					<i class="fas fa-chart-line"></i>
+					Dashboard
+				</a>
+				<a href="#" class="nav-item" data-page="transactions">
+					<i class="fas fa-exchange-alt"></i>
+					Transações
+				</a>
+				<a href="#" class="nav-item" data-page="settings">
+					<i class="fas fa-cog"></i>
+					Configurações
+				</a>
+			</nav>
+			<button id="logoutBtn" class="btn btn-logout">
+				<i class="fas fa-sign-out-alt"></i>
+				Sair
+			</button>
+		</aside>
+
+		<!-- Main Content -->
+		<main class="main-content">
+			<!-- Pages -->
+			<div class="pages-container">
+				<!-- Dashboard -->
+				<section id="dashboard-page" class="page active">
+					<div class="page-header">
+						<h2>Dashboard</h2>
+						<div class="period-selector">
+							<select id="periodSelect">
+								<option value="month">Este Mês</option>
+								<option value="year">Este Ano</option>
+								<option value="all">Todo Período</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="dashboard-grid">
+						<div class="card">
+							<div class="card-icon income">
+								<i class="fas fa-arrow-up"></i>
+							</div>
+							<div class="card-content">
+								<h3>Receitas</h3>
+								<p id="totalIncome">R$ 0,00</p>
+							</div>
+						</div>
+						<div class="card">
+							<div class="card-icon expense">
+								<i class="fas fa-arrow-down"></i>
+							</div>
+							<div class="card-content">
+								<h3>Despesas</h3>
+								<p id="totalExpenses">R$ 0,00</p>
+							</div>
+						</div>
+						<div class="card">
+							<div class="card-icon balance">
+								<i class="fas fa-wallet"></i>
+							</div>
+							<div class="card-content">
+								<h3>Saldo</h3>
+								<p id="balance">R$ 0,00</p>
+							</div>
+						</div>
+						<div class="card">
+							<div class="card-icon savings">
+								<i class="fas fa-piggy-bank"></i>
+							</div>
+							<div class="card-content">
+								<h3>Taxa de Economia</h3>
+								<p id="savings">0%</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="charts-container">
+						<div class="chart-card">
+							<h3>Despesas por Categoria</h3>
+							<div class="chart-wrapper">
+								<canvas id="expensesByCategory"></canvas>
+							</div>
+						</div>
+						<div class="chart-card">
+							<h3>Fluxo de Caixa</h3>
+							<div class="chart-wrapper">
+								<canvas id="cashFlow"></canvas>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- Transactions -->
+				<section id="transactions-page" class="page">
+					<div class="page-header">
+						<h2>Transações</h2>
+						<button id="newTransactionBtn" class="btn btn-primary">
+							<i class="fas fa-plus"></i>
+							Nova Transação
+						</button>
+					</div>
+
+					<div class="transactions-container">
+						<div class="transactions-filters">
+							<input type="text" id="searchTransaction" placeholder="Buscar transação...">
+							<select id="filterCategory">
+								<option value="">Todas as Categorias</option>
+							</select>
+							<select id="filterType">
+								<option value="">Todos os Tipos</option>
+								<option value="income">Receitas</option>
+								<option value="expense">Despesas</option>
+							</select>
+						</div>
+
+						<div class="transactions-list" id="transactionsList"></div>
+					</div>
+				</section>
+
+				<!-- Settings -->
+				<section id="settings-page" class="page">
+					<div class="page-header">
+						<h2>Configurações</h2>
+					</div>
+					<div class="settings-container">
+						<form id="settingsForm">
+							<div class="settings-section">
+								<h3>Preferências</h3>
+								<div class="form-group">
+									<label for="currency">Moeda</label>
+									<select id="currency">
+										<option value="BRL">Real (R$)</option>
+										<option value="USD">Dólar ($)</option>
+										<option value="EUR">Euro (€)</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label for="theme">Tema</label>
+									<select id="theme">
+										<option value="light">Claro</option>
+										<option value="dark">Escuro</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-actions">
+								<button type="submit" class="btn btn-primary">Salvar Alterações</button>
+							</div>
+						</form>
+					</div>
+				</section>
+			</div>
+		</main>
+
+		<!-- Modal Nova Transação -->
+		<div id="transactionModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3>Nova Transação</h3>
+					<button class="close-modal">&times;</button>
+				</div>
+				<form id="transactionForm">
+					<div class="form-group">
+						<label for="description">Descrição</label>
+						<input type="text" id="description" required>
+					</div>
+					<div class="form-group">
+						<label for="amount">Valor</label>
+						<input type="number" id="amount" step="0.01" required>
+					</div>
+					<div class="form-group">
+						<label for="type">Tipo</label>
+						<select id="type" required>
+							<option value="income">Receita</option>
+							<option value="expense">Despesa</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="category">Categoria</label>
+						<select id="category" required>
+							<option value="Salário">Salário</option>
+							<option value="Alimentação">Alimentação</option>
+							<option value="Transporte">Transporte</option>
+							<option value="Moradia">Moradia</option>
+							<option value="Lazer">Lazer</option>
+							<option value="Saúde">Saúde</option>
+							<option value="Educação">Educação</option>
+							<option value="Outros">Outros</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="date">Data</label>
+						<input type="date" id="date" required>
+					</div>
+					<div class="form-actions">
+						<button type="button" class="btn btn-secondary cancel-modal">Cancelar</button>
+						<button type="submit" class="btn btn-primary">Salvar</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	<script>
+		// Inicializar o cliente Supabase
+		const supabaseUrl = 'https://jzamtjaxrxtbhzvdzqfq.supabase.co';
+		const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6YW10amF4cnh0Ymh6dmR6cWZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgxNjQyNTksImV4cCI6MjA1Mzc0MDI1OX0.iGjb1X9sk5Auz3fTYAe-85vM5-xOhkFexu6onRfnW4k';
+		const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+	</script>
+	<script src="script.js"></script>
+</body>
+</html>
