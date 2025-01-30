@@ -76,6 +76,11 @@ function setupEventListeners() {
 
 	if (startDate) startDate.addEventListener('change', handlePeriodChange);
 	if (endDate) endDate.addEventListener('change', handlePeriodChange);
+
+	// Event listeners para o modal de edição
+	document.querySelector('#editTransactionModal .close-modal')?.addEventListener('click', () => toggleEditModal(false));
+	document.querySelector('#editTransactionModal .cancel-modal')?.addEventListener('click', () => toggleEditModal(false));
+	document.getElementById('editTransactionForm')?.addEventListener('submit', handleEditTransactionSubmit);
 }
 
 // Carregamento de Dados
@@ -140,11 +145,11 @@ async function loadUserSettings() {
 
 // Manipuladores de Eventos
 function handleNavigation(e) {
-	e.preventDefault();
+			e.preventDefault();
 	const page = e.currentTarget.dataset.page;
-	showPage(page);
-	
-	document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+			showPage(page);
+			
+			document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
 	e.currentTarget.classList.add('active');
 }
 
@@ -324,7 +329,7 @@ function updateTransactionsList(filteredTransactions = null) {
 	
 	container.innerHTML = '';
 	
-	const transactionsToShow = filteredTransactions || transactions;
+	const transactionsToShow = filteredTransactions || window.transactions;
 
 	if (!transactionsToShow.length) {
 		container.innerHTML = `
@@ -353,11 +358,17 @@ function updateTransactionsList(filteredTransactions = null) {
 			</div>
 			<div class="transaction-amount ${amountClass}">
 				${formatCurrency(Math.abs(transaction.amount))}
-				<i class="fas fa-trash delete-btn" data-id="${transaction.id}"></i>
+				<div class="transaction-actions">
+					<i class="fas fa-edit edit-btn" title="Editar"></i>
+					<i class="fas fa-trash delete-btn" title="Excluir"></i>
+				</div>
 			</div>
 		`;
 		
+		const editBtn = div.querySelector('.edit-btn');
 		const deleteBtn = div.querySelector('.delete-btn');
+		
+		editBtn.addEventListener('click', () => toggleEditModal(true, transaction));
 		deleteBtn.addEventListener('click', () => handleDeleteTransaction(transaction.id));
 		
 		container.appendChild(div);
@@ -373,7 +384,54 @@ function updateCharts() {
 }
 
 function updateExpensesChart(transactions) {
-	if (!window.expensesChart) return;
+	const ctx = document.getElementById('expensesByCategory')?.getContext('2d');
+	if (!ctx) return;
+
+	// Destruir o gráfico existente se houver
+	if (window.expensesChart) {
+		window.expensesChart.destroy();
+	}
+
+	// Criar um novo gráfico
+	window.expensesChart = new Chart(ctx, {
+		type: 'doughnut',
+		data: {
+			labels: [],
+			datasets: [{
+				data: [],
+				backgroundColor: [
+					'#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+					'#9966FF', '#FF9F40', '#2ECC71', '#E74C3C'
+				],
+				borderWidth: 2,
+				borderColor: '#ffffff'
+			}]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: {
+					position: 'right',
+					labels: {
+						color: 'rgb(255, 255, 255)',
+						padding: 20,
+						font: { size: 12 }
+					}
+				},
+				title: {
+					display: true,
+					text: 'Distribuição de Despesas',
+					color: 'rgb(255, 255, 255)',
+					font: {
+						size: 16,
+						weight: 'bold'
+					},
+					padding: 20
+				}
+			}
+		}
+	});
 
 	const categories = {};
 	transactions
@@ -390,7 +448,7 @@ function updateExpensesChart(transactions) {
 
 	window.expensesChart.data.labels = labels;
 	window.expensesChart.data.datasets[0].data = data;
-	window.expensesChart.update();
+	window.expensesChart.update('none'); // Atualiza sem animação para melhor performance
 }
 
 function updateCashFlowChart(transactions) {
@@ -801,4 +859,85 @@ function setupFilterListeners() {
 	if (categoryFilter) categoryFilter.addEventListener('change', filterTransactions);
 	if (typeFilter) typeFilter.addEventListener('change', filterTransactions);
 	if (periodFilter) periodFilter.addEventListener('change', filterTransactions);
+}
+
+// Funções de Edição de Transação
+function toggleEditModal(show, transaction = null) {
+	const modal = document.getElementById('editTransactionModal');
+	if (show && transaction) {
+		modal.classList.add('active');
+		fillEditForm(transaction);
+			} else {
+		modal.classList.remove('active');
+		document.getElementById('editTransactionForm').reset();
+	}
+}
+
+function fillEditForm(transaction) {
+	document.getElementById('editTransactionId').value = transaction.id;
+	document.getElementById('editDescription').value = transaction.description;
+	document.getElementById('editAmount').value = Math.abs(transaction.amount);
+	document.getElementById('editType').value = transaction.type;
+	document.getElementById('editCategory').value = transaction.category;
+	document.getElementById('editDate').value = transaction.date.split('T')[0];
+}
+
+async function handleEditTransactionSubmit(e) {
+	e.preventDefault();
+	
+	const form = e.target;
+	const id = form.querySelector('#editTransactionId').value;
+	const type = form.querySelector('#editType').value;
+	let amount = parseFloat(form.querySelector('#editAmount').value);
+	
+	if (type === 'expense') {
+		amount = -Math.abs(amount);
+	}
+
+	const transaction = {
+		description: form.querySelector('#editDescription').value,
+		amount,
+		type,
+		category: form.querySelector('#editCategory').value,
+		date: form.querySelector('#editDate').value
+	};
+
+	try {
+		const { data, error } = await supabase
+			.from('transactions')
+			.update(transaction)
+			.eq('id', id)
+			.select()
+			.single();
+
+		if (error) throw error;
+
+		// Atualiza a transação no array local
+		const index = window.transactions.findIndex(t => t.id === id);
+		if (index !== -1) {
+			window.transactions[index] = data;
+		}
+
+		// Recarrega os dados para garantir sincronização
+		await loadTransactions();
+
+		// Atualiza toda a UI
+		const currentPage = document.querySelector('.page.active')?.id;
+		if (currentPage === 'dashboard-page') {
+			updateDashboardUI();
+		} else if (currentPage === 'transactions-page') {
+			updateTransactionsList(window.transactions);
+		}
+
+		// Atualiza gráficos e filtros
+		updateCharts();
+		updateCategoryFilter();
+		
+		// Fecha o modal e mostra mensagem de sucesso
+		toggleEditModal(false);
+		alert('Transação atualizada com sucesso!');
+	} catch (error) {
+		console.error('Erro ao editar transação:', error);
+		alert('Erro ao editar transação. Por favor, tente novamente.');
+	}
 }
