@@ -124,23 +124,50 @@ async function loadTransactions() {
 }
 
 async function loadUserSettings() {
-	const { data, error } = await supabase
-		.from('user_settings')
-		.select('*')
-		.eq('user_id', currentUser.id)
-		.single();
+	try {
+		const { data, error } = await supabase
+			.from('user_settings')
+			.select('*')
+			.eq('user_id', currentUser.id)
+			.single();
 
-	if (error && error.code !== 'PGRST116') {
+		if (error && error.code !== 'PGRST116') {
+			console.error('Erro ao carregar configurações:', error);
+			return;
+		}
+
+		if (data) {
+			userSettings = data;
+		} else {
+			// Se não existir configurações, criar uma nova
+			const defaultSettings = {
+				currency: 'BRL',
+				theme: 'light',
+				user_id: currentUser.id
+			};
+			
+			const { data: newSettings, error: insertError } = await supabase
+				.from('user_settings')
+				.insert([defaultSettings])
+				.select()
+				.single();
+
+			if (insertError) {
+				console.error('Erro ao criar configurações:', insertError);
+				return;
+			}
+
+			userSettings = newSettings;
+		}
+
+		// Aplica o tema salvo
+		applyTheme(userSettings.theme);
+		
+		// Atualiza o formulário com as configurações atuais
+		updateSettingsForm();
+	} catch (error) {
 		console.error('Erro ao carregar configurações:', error);
-		return;
 	}
-
-	userSettings = data || {
-		currency: 'BRL',
-		theme: 'light'
-	};
-
-	applyTheme(userSettings.theme);
 }
 
 // Manipuladores de Eventos
@@ -196,11 +223,12 @@ async function handleTransactionSubmit(e) {
 		// Atualiza o array local de transações
 		window.transactions = [data, ...window.transactions];
 		
-		// Atualiza a UI imediatamente
+		// Atualiza todas as interfaces
 		updateUI();
 		updateDashboardUI();
 		updateTransactionsList(window.transactions);
 		updateCharts();
+		updateCards();
 		
 		toggleModal(false);
 		form.reset();
@@ -220,14 +248,23 @@ async function handleSettingsSubmit(e) {
 	};
 
 	try {
+		// Atualiza as configurações existentes
 		const { error } = await supabase
 			.from('user_settings')
-			.upsert([newSettings]);
+			.update(newSettings)
+			.eq('user_id', currentUser.id);
 
 		if (error) throw error;
 
+		// Atualiza as configurações locais
 		userSettings = newSettings;
+		
+		// Aplica o novo tema
 		applyTheme(newSettings.theme);
+		
+		// Atualiza o formulário
+		updateSettingsForm();
+		
 		alert('Configurações salvas com sucesso!');
 	} catch (error) {
 		console.error('Erro ao salvar configurações:', error);
@@ -561,7 +598,13 @@ function formatCurrency(value) {
 }
 
 function applyTheme(theme) {
-	document.body.setAttribute('data-theme', theme);
+	document.body.setAttribute('data-theme', theme || 'light');
+	
+	// Atualiza o select do tema se existir
+	const themeSelect = document.getElementById('theme');
+	if (themeSelect) {
+		themeSelect.value = theme || 'light';
+	}
 }
 
 // Inicialização dos Gráficos
@@ -744,11 +787,12 @@ async function handleDeleteTransaction(id) {
 		// Atualiza o array local de transações
 		window.transactions = window.transactions.filter(t => t.id !== id);
 		
-		// Atualiza a UI imediatamente
+		// Atualiza todas as interfaces
 		updateUI();
 		updateDashboardUI();
 		updateTransactionsList(window.transactions);
 		updateCharts();
+		updateCards();
 		
 	} catch (error) {
 		console.error('Erro ao deletar transação:', error);
@@ -761,11 +805,14 @@ function handleThemeChange(e) {
 	applyTheme(e.target.value);
 }
 
-// Adicionar nova função para atualizar o formulário de configurações
+// Função para atualizar o formulário de configurações
 function updateSettingsForm() {
 	if (userSettings) {
-		document.getElementById('currency').value = userSettings.currency;
-		document.getElementById('theme').value = userSettings.theme;
+		const currencySelect = document.getElementById('currency');
+		const themeSelect = document.getElementById('theme');
+		
+		if (currencySelect) currencySelect.value = userSettings.currency;
+		if (themeSelect) themeSelect.value = userSettings.theme;
 	}
 }
 
@@ -921,17 +968,12 @@ async function handleEditTransactionSubmit(e) {
 		// Recarrega os dados para garantir sincronização
 		await loadTransactions();
 
-		// Atualiza toda a UI
-		const currentPage = document.querySelector('.page.active')?.id;
-		if (currentPage === 'dashboard-page') {
-			updateDashboardUI();
-		} else if (currentPage === 'transactions-page') {
-			updateTransactionsList(window.transactions);
-		}
-
-		// Atualiza gráficos e filtros
+		// Atualiza todas as interfaces
+		updateUI();
+		updateDashboardUI();
+		updateTransactionsList(window.transactions);
 		updateCharts();
-		updateCategoryFilter();
+		updateCards();
 		
 		// Fecha o modal e mostra mensagem de sucesso
 		toggleEditModal(false);
