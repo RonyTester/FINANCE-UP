@@ -223,11 +223,12 @@ async function handleTransactionSubmit(e) {
 		// Atualiza o array local de transações
 		window.transactions = [data, ...window.transactions];
 		
-		// Atualiza a UI imediatamente
+		// Atualiza todas as interfaces
 		updateUI();
 		updateDashboardUI();
 		updateTransactionsList(window.transactions);
 		updateCharts();
+		updateCards();
 		
 		toggleModal(false);
 		form.reset();
@@ -786,11 +787,12 @@ async function handleDeleteTransaction(id) {
 		// Atualiza o array local de transações
 		window.transactions = window.transactions.filter(t => t.id !== id);
 		
-		// Atualiza a UI imediatamente
+		// Atualiza todas as interfaces
 		updateUI();
 		updateDashboardUI();
 		updateTransactionsList(window.transactions);
 		updateCharts();
+		updateCards();
 		
 	} catch (error) {
 		console.error('Erro ao deletar transação:', error);
@@ -966,17 +968,12 @@ async function handleEditTransactionSubmit(e) {
 		// Recarrega os dados para garantir sincronização
 		await loadTransactions();
 
-		// Atualiza toda a UI
-		const currentPage = document.querySelector('.page.active')?.id;
-		if (currentPage === 'dashboard-page') {
-			updateDashboardUI();
-		} else if (currentPage === 'transactions-page') {
-			updateTransactionsList(window.transactions);
-		}
-
-		// Atualiza gráficos e filtros
+		// Atualiza todas as interfaces
+		updateUI();
+		updateDashboardUI();
+		updateTransactionsList(window.transactions);
 		updateCharts();
-		updateCategoryFilter();
+		updateCards();
 		
 		// Fecha o modal e mostra mensagem de sucesso
 		toggleEditModal(false);
