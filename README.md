@@ -124,3 +124,12 @@ Este projeto está sob a licença MIT - veja o arquivo [LICENSE.md](LICENSE.md) 
 Seu Nome - [@seu_twitter](https://twitter.com/seu_twitter) - seu_email@email.com
 
 Link do Projeto: [https://github.com/seu-usuario/finance](https://github.com/seu-usuario/finance)
+
+
+depois
+Quando terminar todas as alterações e quiser mesclar com a branch principal:
+1. Vá para o GitHub no navegador
+Crie um "Pull Request"
+Revise as mudanças
+Faça o merge
+Quer começar a fazer alguma alteração específica na branch? Posso te ajudar com isso!
