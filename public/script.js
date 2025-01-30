@@ -188,8 +188,15 @@ async function handleTransactionSubmit(e) {
 
 		if (error) throw error;
 
-		transactions.unshift(data);
+		// Atualiza o array local de transações
+		window.transactions = [data, ...window.transactions];
+		
+		// Atualiza a UI imediatamente
 		updateUI();
+		updateDashboardUI();
+		updateTransactionsList(window.transactions);
+		updateCharts();
+		
 		toggleModal(false);
 		form.reset();
 	} catch (error) {
@@ -676,8 +683,15 @@ async function handleDeleteTransaction(id) {
 
 		if (error) throw error;
 
-		transactions = transactions.filter(t => t.id !== id);
+		// Atualiza o array local de transações
+		window.transactions = window.transactions.filter(t => t.id !== id);
+		
+		// Atualiza a UI imediatamente
 		updateUI();
+		updateDashboardUI();
+		updateTransactionsList(window.transactions);
+		updateCharts();
+		
 	} catch (error) {
 		console.error('Erro ao deletar transação:', error);
 		alert('Erro ao deletar transação. Por favor, tente novamente.');
