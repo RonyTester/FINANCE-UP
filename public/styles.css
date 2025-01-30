@@ -126,7 +126,7 @@ body {
 	align-items: center;
 	justify-content: center;
 	gap: 0.5rem;
-	background-color: transparent;
+	background-color: rgba(214, 48, 49, 0.1);
 	color: var(--danger-color);
 	border: 1px solid var(--danger-color);
 	border-radius: 0.5rem;
@@ -254,20 +254,54 @@ body {
 	position: relative;
 }
 
-/* Transações */
+/* Estilos para os filtros */
 .transactions-filters {
-	display: flex;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 	gap: 1rem;
-	margin-bottom: 1.5rem;
+	margin-bottom: 2rem;
+	padding: 1rem;
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 1rem;
+	backdrop-filter: blur(10px);
 }
 
 .transactions-filters input,
-.transactions-filters select {
-	padding: 0.5rem;
-	border: 1px solid var(--border-color);
-	border-radius: 0.5rem;
-	background-color: var(--bg-primary);
-	color: var(--text-primary);
+.transactions-filters select,
+#periodSelect {
+	width: 100%;
+	padding: 0.75rem 1rem;
+	border: 1.5px solid rgba(255, 255, 255, 0.2);
+	border-radius: 0.75rem;
+	background: rgba(255, 255, 255, 0.1);
+	color: #ffffff;
+	font-size: 0.95rem;
+	transition: all 0.3s ease;
+	appearance: none;
+	-webkit-appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 0.75rem center;
+	background-size: 1rem;
+	padding-right: 2.5rem;
+}
+
+.transactions-filters input::placeholder {
+	color: rgba(255, 255, 255, 0.6);
+}
+
+.transactions-filters input:focus,
+.transactions-filters select:focus,
+#periodSelect:focus {
+	outline: none;
+	border-color: rgba(255, 255, 255, 0.5);
+	background: rgba(255, 255, 255, 0.15);
+}
+
+.transactions-filters select option,
+#periodSelect option {
+	background: #2d3436;
+	color: #ffffff;
 }
 
 .transactions-list {
@@ -283,10 +317,15 @@ body {
 	align-items: center;
 	padding: 1rem 1.5rem;
 	border-bottom: 1px solid var(--border-color);
+	transition: all 0.3s ease;
 }
 
 .transaction-item:last-child {
 	border-bottom: none;
+}
+
+.transaction-item:hover {
+	background-color: rgba(0, 0, 0, 0.05);
 }
 
 .transaction-info {
@@ -296,23 +335,27 @@ body {
 .transaction-info strong {
 	display: block;
 	color: var(--text-primary);
+	font-size: 1.1rem;
+	margin-bottom: 0.25rem;
 }
 
 .transaction-info div {
 	color: var(--text-secondary);
-	font-size: 0.875rem;
+	font-size: 0.9rem;
+	margin-bottom: 0.25rem;
 }
 
 .transaction-info small {
 	color: var(--text-secondary);
-	font-size: 0.75rem;
+	font-size: 0.8rem;
 }
 
 .transaction-amount {
-	font-weight: 600;
 	display: flex;
 	align-items: center;
 	gap: 1rem;
+	font-weight: 600;
+	font-size: 1.1rem;
 }
 
 .amount-positive {
@@ -324,13 +367,16 @@ body {
 }
 
 .delete-btn {
+	color: var(--text-secondary);
 	cursor: pointer;
-	opacity: 0.7;
-	transition: opacity 0.3s ease;
+	padding: 0.5rem;
+	border-radius: 50%;
+	transition: all 0.3s ease;
 }
 
 .delete-btn:hover {
-	opacity: 1;
+	color: var(--danger-color);
+	background-color: rgba(214, 48, 49, 0.1);
 }
 
 /* Modal */
@@ -451,33 +497,437 @@ body {
 @media (max-width: 768px) {
 	.wrapper {
 		flex-direction: column;
+		height: 100vh;
+		overflow-y: auto;
 	}
 
 	.sidebar {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
 		width: 100%;
 		height: auto;
-		padding: 1rem;
+		padding: 0.5rem;
+		z-index: 1000;
+		background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
+		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+	}
+
+	.sidebar-header {
+		display: none;
+	}
+
+	.sidebar-nav {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-around;
+		padding: 0;
+		margin: 0;
+	}
+
+	.nav-item {
+		flex: 1;
+		padding: 0.5rem;
+		font-size: 0.9rem;
+		text-align: center;
+		border-radius: 0.5rem;
+	}
+
+	.nav-item i {
+		display: block;
+		margin: 0 auto 0.25rem;
+		font-size: 1.2rem;
+	}
+
+	.btn-logout {
+		display: flex;
+		margin: 0.5rem auto 0;
+		max-width: 120px;
+		padding: 0.5rem;
+		font-size: 0.9rem;
+	}
+
+	.btn-logout i {
+		font-size: 1rem;
 	}
 
 	.main-content {
+		padding: 1rem 1rem 5rem;
+		height: calc(100vh - 60px);
+		overflow-y: auto;
+	}
+
+	/* Ajustes no Dashboard */
+	.dashboard-grid {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 0.75rem;
+	}
+
+	.card {
 		padding: 1rem;
 	}
 
+	.card-icon {
+		width: 36px;
+		height: 36px;
+		font-size: 1.2rem;
+	}
+
+	.card-content h3 {
+		font-size: 0.8rem;
+	}
+
+	.card-content p {
+		font-size: 1.2rem;
+	}
+
+	/* Ajustes nos Gráficos */
+	.charts-container {
+		grid-template-columns: 1fr;
+		gap: 1rem;
+	}
+
+	.chart-card {
+		padding: 1rem;
+	}
+
+	.chart-wrapper {
+		height: 250px;
+	}
+
+	/* Ajustes nas Transações */
+	.transactions-filters {
+		grid-template-columns: 1fr;
+		gap: 0.75rem;
+		padding: 0.75rem;
+	}
+
+	.transactions-filters input,
+	.transactions-filters select,
+	#periodSelect {
+		padding: 0.6rem 0.875rem;
+		font-size: 0.9rem;
+	}
+
+	.transaction-item {
+		padding: 0.75rem 1rem;
+	}
+
+	.transaction-info strong {
+		font-size: 1rem;
+	}
+
+	.transaction-info div {
+		font-size: 0.8rem;
+	}
+
+	.transaction-amount {
+		font-size: 1rem;
+	}
+
+	/* Ajustes no Modal */
+	.modal-content {
+		margin: 0.5rem;
+		padding: 1rem;
+		max-height: calc(100vh - 2rem);
+		overflow-y: auto;
+	}
+
+	.form-group label {
+		font-size: 0.9rem;
+	}
+
+	.form-group input,
+	.form-group select {
+		padding: 0.5rem;
+		font-size: 0.9rem;
+	}
+
+	/* Adicionar botão de logout na header */
+	.page-header {
+		position: relative;
+	}
+
+	.mobile-logout {
+		display: none;
+	}
+
+	/* Ajustes Gerais para Mobile */
+	.main-content {
+		-webkit-overflow-scrolling: touch;
+		scroll-behavior: smooth;
+	}
+
+	/* Ajustes na Navigation Bar */
+	.nav-item {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.nav-item::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		width: 0;
+		height: 2px;
+		background-color: white;
+		transition: all 0.3s ease;
+		transform: translateX(-50%);
+	}
+
+	.nav-item.active::after {
+		width: 50%;
+	}
+
+	/* Melhorar interação com botões */
+	.btn,
+	.nav-item,
+	.mobile-logout,
+	.delete-btn {
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	/* Ajustes nos Cards */
+	.card {
+		transition: transform 0.2s ease;
+	}
+
+	.card:active {
+		transform: scale(0.98);
+	}
+
+	/* Ajustes nas Transações */
+	.transaction-item {
+		position: relative;
+		padding-right: 3rem;
+	}
+
+	.delete-btn {
+		position: absolute;
+		right: 1rem;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	/* Melhorar Modal em Mobile */
+	.modal-content {
+		border-radius: 1.5rem 1.5rem 0 0;
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		max-height: 90vh;
+		margin: 0;
+	}
+
+	.modal.active {
+		align-items: flex-end;
+	}
+
+	/* Melhorar Formulários em Mobile */
+	.form-group input[type="number"],
+	.form-group input[type="date"] {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	.form-group select {
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: right 0.5rem center;
+		background-size: 1.2rem;
+		padding-right: 2rem;
+	}
+
+	/* Melhorar Feedback Visual */
+	.btn:active,
+	.nav-item:active,
+	.transaction-item:active {
+		opacity: 0.7;
+	}
+
+	/* Ajustes nos Gráficos */
+	.chart-wrapper {
+		margin: 0 -1rem;
+		padding: 0 1rem;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	/* Melhorar Scrollbars */
+	::-webkit-scrollbar {
+		width: 4px;
+		height: 4px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: var(--border-color);
+		border-radius: 2px;
+	}
+}
+
+/* Ajustes para telas muito pequenas */
+@media (max-width: 360px) {
 	.dashboard-grid {
 		grid-template-columns: 1fr;
 	}
 
-	.charts-container {
-		grid-template-columns: 1fr;
+	.nav-item {
+		font-size: 0.8rem;
 	}
 
-	.transactions-filters {
-		flex-direction: column;
+	.nav-item i {
+		font-size: 1rem;
 	}
+}
 
-	.modal-content {
-		margin: 1rem;
-		padding: 1rem;
+/* Ajustes para Notch e Safe Areas */
+@supports (padding: max(0px)) {
+	@media (max-width: 768px) {
+		.sidebar {
+			padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+		}
+
+		.main-content {
+			padding-left: max(1rem, env(safe-area-inset-left));
+			padding-right: max(1rem, env(safe-area-inset-right));
+			padding-bottom: calc(5rem + max(0px, env(safe-area-inset-bottom)));
+		}
 	}
+}
+
+/* Páginas */
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+/* Mensagem de Nenhuma Transação */
+.no-transactions {
+    text-align: center;
+    padding: 2rem;
+    background-color: var(--bg-secondary);
+    border-radius: 1rem;
+    margin: 1rem 0;
+}
+
+.no-transactions p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+/* Melhorias na Lista de Transações */
+.transactions-list {
+    min-height: 200px;
+}
+
+.transaction-item {
+    transition: background-color 0.3s ease;
+}
+
+.transaction-item:hover {
+    background-color: var(--bg-secondary);
+}
+
+/* Melhorias nos Formulários */
+.settings-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: var(--bg-secondary);
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+}
+
+.settings-section h3 {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+/* Ajustes específicos para o select de período no Dashboard */
+.period-selector {
+    margin-left: auto;
+    min-width: 150px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.date-range span {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.filter-date {
+    padding: 0.5rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-date:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(9, 132, 227, 0.1);
+}
+
+.filter-select {
+    padding: 0.5rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(9, 132, 227, 0.1);
+}
+
+@media (max-width: 768px) {
+    .period-selector {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .date-range {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-date,
+    .filter-select {
+        width: 100%;
+    }
 }
 

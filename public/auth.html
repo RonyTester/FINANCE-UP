@@ -3,16 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance - Login</title>
+    <title>Finance Up - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <style>
+        body {
+            background: linear-gradient(135deg, #0984e3 0%, #2d3436 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
         .auth-container {
             max-width: 400px;
-            margin: 50px auto;
-            padding: 20px;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .logo-container img {
+            max-width: 180px;
+            height: auto;
+            margin-bottom: 0.5rem;
         }
 
         .auth-form {
@@ -23,58 +46,181 @@
             display: block;
         }
 
+        .auth-form h2 {
+            text-align: center;
+            color: #2d3436;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 1.5rem;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            color: #636e72;
+            font-size: 0.95rem;
+            font-weight: 500;
         }
 
         .form-group input {
             width: 100%;
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            padding: 0.875rem 1.25rem;
+            border: 1.5px solid #dfe6e9;
+            border-radius: 0.75rem;
+            background: #ffffff;
+            color: #2d3436;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0984e3;
+            box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 0.875rem;
+            background: #0984e3;
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button[type="submit"]:hover {
+            background: #0876c9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(9, 132, 227, 0.2);
         }
 
         .auth-links {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 2rem;
         }
 
         .auth-links a {
-            color: var(--primary-color);
+            color: #0984e3;
             text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-links a:hover {
+            color: #0876c9;
+            text-decoration: underline;
         }
 
         .error-message {
-            color: var(--error-color);
-            margin-top: 10px;
+            color: #d63031;
+            background-color: rgba(214, 48, 49, 0.1);
+            padding: 0.875rem;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
             text-align: center;
+            font-size: 0.95rem;
+            font-weight: 500;
             display: none;
+        }
+
+        /* Ajustes para Desktop (telas maiores que 768px) */
+        @media (min-width: 768px) {
+            .auth-container {
+                padding: 2.5rem;
+                max-width: 420px;
+            }
+
+            .logo-container img {
+                max-width: 160px;
+                margin-bottom: 1rem;
+            }
+
+            .auth-form h2 {
+                font-size: 1.75rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        /* Ajustes para Mobile */
+        @media (max-width: 767px) {
+            .auth-container {
+                padding: 1.5rem;
+                max-width: 100%;
+                margin: 1rem;
+            }
+
+            .logo-container {
+                margin-bottom: 0.75rem;
+            }
+
+            .logo-container img {
+                max-width: 140px;
+                margin-bottom: 0.5rem;
+            }
+
+            .auth-form h2 {
+                font-size: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                margin-bottom: 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .form-group input {
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            button[type="submit"] {
+                padding: 0.75rem;
+                margin-top: 1rem;
+                font-size: 0.95rem;
+            }
+
+            .auth-links {
+                margin-top: 1.5rem;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="auth-container">
+        <div class="logo-container">
+            <img src="login_page/financeup.png" alt="Finance Up Logo">
+        </div>
+
         <div id="loginForm" class="auth-form active">
-            <h2>Login</h2>
+            <h2>Bem-vindo de volta!</h2>
             <form onsubmit="return handleLogin(event)">
                 <div class="form-group">
                     <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" required>
+                    <input type="email" id="loginEmail" required placeholder="Seu email">
                 </div>
                 <div class="form-group">
                     <label for="loginPassword">Senha</label>
-                    <input type="password" id="loginPassword" required>
+                    <input type="password" id="loginPassword" required placeholder="Sua senha">
                 </div>
-                <button type="submit" class="btn btn-primary">Entrar</button>
+                <button type="submit">Entrar</button>
                 <div class="error-message" id="loginError"></div>
             </form>
             <div class="auth-links">
@@ -83,21 +229,21 @@
         </div>
 
         <div id="registerForm" class="auth-form">
-            <h2>Registro</h2>
+            <h2>Crie sua conta</h2>
             <form onsubmit="return handleRegister(event)">
                 <div class="form-group">
                     <label for="registerEmail">Email</label>
-                    <input type="email" id="registerEmail" required>
+                    <input type="email" id="registerEmail" required placeholder="Seu melhor email">
                 </div>
                 <div class="form-group">
                     <label for="registerPassword">Senha</label>
-                    <input type="password" id="registerPassword" required minlength="6">
+                    <input type="password" id="registerPassword" required minlength="6" placeholder="Mínimo 6 caracteres">
                 </div>
                 <div class="form-group">
                     <label for="confirmPassword">Confirmar Senha</label>
-                    <input type="password" id="confirmPassword" required minlength="6">
+                    <input type="password" id="confirmPassword" required minlength="6" placeholder="Digite a senha novamente">
                 </div>
-                <button type="submit" class="btn btn-primary">Registrar</button>
+                <button type="submit">Criar Conta</button>
                 <div class="error-message" id="registerError"></div>
             </form>
             <div class="auth-links">

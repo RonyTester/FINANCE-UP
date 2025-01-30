@@ -44,11 +44,17 @@
 					<div class="page-header">
 						<h2>Dashboard</h2>
 						<div class="period-selector">
-							<select id="periodSelect">
+							<select id="periodSelect" class="filter-select">
 								<option value="month">Este Mês</option>
 								<option value="year">Este Ano</option>
 								<option value="all">Todo Período</option>
+								<option value="custom">Período Personalizado</option>
 							</select>
+							<div id="customDateRange" class="date-range" style="display: none;">
+								<input type="date" id="startDate" class="filter-date">
+								<span>até</span>
+								<input type="date" id="endDate" class="filter-date">
+							</div>
 						</div>
 					</div>
 
@@ -218,8 +224,8 @@
 	</div>
 
 	<!-- Scripts -->
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script>
 		// Inicializar o cliente Supabase
 		const supabaseUrl = 'https://jzamtjaxrxtbhzvdzqfq.supabase.co';
