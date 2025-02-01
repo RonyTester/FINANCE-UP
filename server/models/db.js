@@ -109,4 +109,35 @@ export const deleteCategory = async (id, userId) => {
     
     if (error) throw error
     return true
+}
+
+// Função para deletar usuário e todos os dados relacionados
+export const deleteUser = async (userId) => {
+    try {
+        // Primeiro, deletar todas as transações do usuário
+        const { error: transError } = await supabase
+            .from('transactions')
+            .delete()
+            .eq('user_id', userId);
+        
+        if (transError) throw transError;
+
+        // Deletar as configurações do usuário
+        const { error: settingsError } = await supabase
+            .from('user_settings')
+            .delete()
+            .eq('user_id', userId);
+        
+        if (settingsError) throw settingsError;
+
+        // Por fim, deletar o usuário
+        const { error: userError } = await supabase.auth.admin.deleteUser(userId);
+        
+        if (userError) throw userError;
+
+        return true;
+    } catch (error) {
+        console.error('Erro ao deletar usuário:', error);
+        throw error;
+    }
 } 

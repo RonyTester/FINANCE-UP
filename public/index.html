@@ -15,6 +15,10 @@
 				<i class="fas fa-wallet"></i>
 				<h1>Finance</h1>
 			</div>
+			<div class="user-info">
+				<i class="fas fa-user-circle"></i>
+				<span id="userDisplayName">Usuário</span>
+			</div>
 			<nav class="sidebar-nav">
 				<a href="#" class="nav-item active" data-page="dashboard">
 					<i class="fas fa-chart-line"></i>
@@ -42,6 +46,10 @@
 				<!-- Dashboard -->
 				<section id="dashboard-page" class="page active">
 					<div class="page-header">
+						<div class="mobile-user-info">
+							<i class="fas fa-user-circle"></i>
+							<span id="mobileUserName"></span>
+						</div>
 						<h2>Dashboard</h2>
 						<div class="period-selector">
 							<select id="periodSelect" class="filter-select">
@@ -148,10 +156,35 @@
 					<div class="settings-container">
 						<form id="settingsForm">
 							<div class="settings-section">
+								<h3>Informações da Conta</h3>
+								<div class="account-info">
+									<div class="info-group">
+										<label>Nome de Usuário</label>
+										<div class="editable-field">
+											<input type="text" id="displayName" class="edit-input" maxlength="30" placeholder="Seu nome de usuário">
+										</div>
+									</div>
+									<div class="info-group">
+										<label>Email</label>
+										<p id="accountEmail"></p>
+									</div>
+									<div class="info-group">
+										<label>Membro desde</label>
+										<p id="accountCreated"></p>
+									</div>
+									<div class="account-actions">
+										<button type="button" id="deleteAccountBtn" class="btn btn-danger">
+											<i class="fas fa-trash"></i>
+											Excluir Conta
+										</button>
+									</div>
+								</div>
+							</div>
+							<div class="settings-section">
 								<h3>Preferências</h3>
 								<div class="form-group">
 									<label for="currency">Moeda</label>
-									<select id="currency">
+									<select id="currency" name="currency">
 										<option value="BRL">Real (R$)</option>
 										<option value="USD">Dólar ($)</option>
 										<option value="EUR">Euro (€)</option>
@@ -159,7 +192,7 @@
 								</div>
 								<div class="form-group">
 									<label for="theme">Tema</label>
-									<select id="theme">
+									<select id="theme" name="theme">
 										<option value="light">Claro</option>
 										<option value="dark">Escuro</option>
 									</select>
@@ -271,6 +304,9 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Container de Notificações -->
+	<div id="notifications-container"></div>
 
 	<!-- Scripts -->
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

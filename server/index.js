@@ -215,6 +215,30 @@ app.delete('/api/categories/:id', authMiddleware, async (req, res) => {
 	}
 });
 
+// Rota para deletar usuário
+app.delete('/api/users/:userId', authMiddleware, async (req, res) => {
+	try {
+		const { userId } = req.params;
+		
+		// Verificar se o usuário tem permissão (só pode deletar a si mesmo)
+		if (userId !== req.user.id) {
+			return res.status(403).json({ 
+				error: 'Não autorizado',
+				details: 'Você só pode deletar sua própria conta'
+			});
+		}
+
+		await db.deleteUser(userId);
+		res.json({ message: 'Usuário deletado com sucesso' });
+	} catch (error) {
+		console.error('Erro ao deletar usuário:', error);
+		res.status(500).json({ 
+			error: 'Erro ao deletar usuário',
+			details: error.message 
+		});
+	}
+});
+
 // Serve the main page and handle client-side routing
 app.get('/*', (req, res) => {
 	res.sendFile(path.join(__dirname, '../public/index.html'));

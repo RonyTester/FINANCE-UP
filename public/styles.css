@@ -807,6 +807,60 @@ body {
 		background: var(--border-color);
 		border-radius: 2px;
 	}
+
+	.mobile-user-info {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 100;
+		font-size: 0.9rem;
+		color: var(--text-primary);
+		background: rgba(255, 255, 255, 0.1);
+		padding: 0.75rem 1rem;
+		margin: 0.5rem 1rem;
+		border-radius: 12px;
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.mobile-user-info i {
+		font-size: 1.1rem;
+		color: var(--primary-color);
+		opacity: 0.9;
+	}
+
+	.mobile-user-info span {
+		font-weight: 500;
+		max-width: 200px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		color: var(--text-primary);
+	}
+
+	.page-header {
+		padding-top: 4rem;
+		position: relative;
+	}
+
+	.dashboard-grid {
+		margin-top: 1rem;
+	}
+
+	/* Ajuste para o seletor de período não conflitar */
+	.period-selector {
+		margin-top: 0.5rem;
+	}
+
+	/* Ajuste para garantir que o botão de nova transação não seja sobreposto */
+	.page-header .btn-primary {
+		margin-top: 0.5rem;
+	}
 }
 
 /* Ajustes para telas muito pequenas */
@@ -877,57 +931,578 @@ body {
 
 /* Melhorias nos Formulários */
 .settings-container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
-    background-color: var(--bg-secondary);
-    border-radius: 1rem;
-    box-shadow: var(--card-shadow);
 }
 
 .settings-section {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 2rem;
     margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .settings-section h3 {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.info-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.info-group label {
     color: var(--text-secondary);
-    margin-bottom: 1rem;
-    font-size: 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
-/* Ajustes específicos para o select de período no Dashboard */
-.period-selector {
-    background: var(--bg-secondary);
+.info-group p {
+    color: var(--text-primary);
+    font-size: 1rem;
     padding: 0.5rem;
-    border-radius: 0.75rem;
-    box-shadow: var(--card-shadow);
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border: 1.5px solid var(--border-color);
 }
 
-.filter-date {
+.editable-field {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.edit-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
     background: var(--bg-primary);
     color: var(--text-primary);
-    border-color: var(--border-color);
+    font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
-.date-range span {
+.edit-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
+}
+
+.btn-sm {
+    padding: 0.75rem;
+    font-size: 1rem;
+    min-width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.account-actions {
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--border-color);
+}
+
+#deleteAccountBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--danger-color);
+    border: 2px solid var(--danger-color);
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#deleteAccountBtn:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
     color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.form-actions .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 8px;
 }
 
 @media (max-width: 768px) {
-    .period-selector {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.5rem;
+    .settings-container {
+        padding: 1rem;
     }
 
-    .date-range {
-        flex-direction: column;
-        gap: 0.5rem;
+    .settings-section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
     }
 
-    .filter-date,
-    .filter-select {
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
         width: 100%;
+    }
+}
+
+/* Ajustes para Mobile */
+@media (max-width: 768px) {
+    .user-info {
+        display: none;
+    }
+
+    .page-header {
+        position: relative;
+        padding-top: 3rem;
+    }
+
+    .page-header .mobile-user-info {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: var(--bg-secondary);
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .mobile-user-info i {
+        font-size: 1.2rem;
+        color: var(--primary-color);
+    }
+
+    .mobile-user-info span {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .editable-field {
+        flex-direction: row;
+    }
+
+    .edit-input {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.75rem;
+    }
+}
+
+/* Informações do Usuário na Sidebar */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+}
+
+.user-info i {
+    font-size: 1.5rem;
+}
+
+.user-info span {
+    font-size: 1rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+/* Campo editável nas configurações */
+.editable-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.edit-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(9, 132, 227, 0.1);
+}
+
+.btn-sm {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ajustes para Mobile */
+@media (max-width: 768px) {
+    .user-info {
+        display: none;
+    }
+
+    .page-header {
+        position: relative;
+        padding-top: 3rem;
+    }
+
+    .page-header .mobile-user-info {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: var(--bg-secondary);
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .mobile-user-info i {
+        font-size: 1.2rem;
+        color: var(--primary-color);
+    }
+
+    .mobile-user-info span {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .editable-field {
+        flex-direction: row;
+    }
+
+    .edit-input {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.75rem;
+    }
+}
+
+#welcomeModal .modal-content {
+    max-width: 450px;
+    background: var(--bg-primary);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease forwards;
+}
+
+#welcomeModal .modal-header {
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary-color), #4a90e2);
+    color: white;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#welcomeModal .welcome-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    animation: bounceIn 0.6s ease;
+}
+
+#welcomeModal .modal-header h3 {
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+#welcomeModal .welcome-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+#welcomeModal .modal-body {
+    padding: 2rem;
+}
+
+#welcomeModal .welcome-message {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+#welcomeModal .welcome-message i {
+    font-size: 2rem;
+    color: var(--primary-color);
+    opacity: 0.9;
+}
+
+#welcomeModal p {
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+#welcomeModal .input-icon {
+    position: relative;
+    width: 100%;
+}
+
+#welcomeModal .input-icon i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+#welcomeModal .edit-input {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 2.75rem;
+    font-size: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-primary);
+    transition: all 0.3s ease;
+}
+
+#welcomeModal .form-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+#welcomeModal .btn {
+    min-width: 160px;
+    font-size: 1rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+#welcomeModal .btn i {
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    #welcomeModal .modal-content {
+        margin: 1rem;
+        width: calc(100% - 2rem);
+    }
+    
+    #welcomeModal .modal-header {
+        padding: 1.75rem 1.5rem;
+    }
+    
+    #welcomeModal .modal-body {
+        padding: 1.75rem 1.5rem;
+    }
+    
+    #welcomeModal .welcome-icon {
+        font-size: 2.25rem;
+    }
+    
+    #welcomeModal .modal-header h3 {
+        font-size: 1.35rem;
+    }
+    
+    #welcomeModal .welcome-subtitle {
+        font-size: 0.9rem;
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+@media (max-width: 768px) {
+    #welcomeModal .modal-content {
+        margin: 1rem;
+        width: calc(100% - 2rem);
+    }
+    
+    #welcomeModal .modal-header {
+        padding: 1.75rem 1.5rem;
+    }
+    
+    #welcomeModal .modal-body {
+        padding: 1.75rem 1.5rem;
+    }
+    
+    #welcomeModal .welcome-icon {
+        font-size: 2.25rem;
+    }
+    
+    #welcomeModal .modal-header h3 {
+        font-size: 1.35rem;
+    }
+    
+    #welcomeModal .welcome-subtitle {
+        font-size: 0.9rem;
+    }
+}
+
+.mobile-user-info {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1rem;
+        margin: 0.5rem 1rem;
+        border-radius: 12px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-user-info i {
+        font-size: 1.1rem;
+        color: var(--primary-color);
+        opacity: 0.9;
+    }
+
+    .mobile-user-info span {
+        font-weight: 500;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--text-primary);
+    }
+
+    .page-header {
+        padding-top: 4rem;
+        position: relative;
+    }
+
+    .dashboard-grid {
+        margin-top: 1rem;
+    }
+
+    /* Ajuste para o seletor de período não conflitar */
+    .period-selector {
+        margin-top: 0.5rem;
+    }
+
+    /* Ajuste para garantir que o botão de nova transação não seja sobreposto */
+    .page-header .btn-primary {
+        margin-top: 0.5rem;
     }
 }
 

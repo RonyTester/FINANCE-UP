@@ -2,6 +2,7 @@
 let currentUser = null;
 let transactions = [];
 let userSettings = null;
+let isFirstLogin = false;
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', async () => {
@@ -10,6 +11,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 	setupFilterListeners();
 	initializeCharts();
 	await loadUserData();
+	updateUserInfo();
+	
+	// Verifica se é primeiro login ou se não tem nome de usuário
+	if (!userSettings?.display_name) {
+		showWelcomeModal();
+	}
 });
 
 // Autenticação
@@ -81,6 +88,9 @@ function setupEventListeners() {
 	document.querySelector('#editTransactionModal .close-modal')?.addEventListener('click', () => toggleEditModal(false));
 	document.querySelector('#editTransactionModal .cancel-modal')?.addEventListener('click', () => toggleEditModal(false));
 	document.getElementById('editTransactionForm')?.addEventListener('submit', handleEditTransactionSubmit);
+
+	// Adicionar listener para o botão de deletar conta
+	document.getElementById('deleteAccountBtn')?.addEventListener('click', handleDeleteAccount);
 }
 
 // Carregamento de Dados
@@ -138,26 +148,28 @@ async function loadUserSettings() {
 
 		if (data) {
 			userSettings = data;
+			isFirstLogin = false;
 		} else {
+			isFirstLogin = true;
 			// Se não existir configurações, criar uma nova
 			const defaultSettings = {
 				currency: 'BRL',
 				theme: 'light',
+				display_name: '', // Garantir que começa vazio
 				user_id: currentUser.id
 			};
 			
 			const { data: newSettings, error: insertError } = await supabase
 				.from('user_settings')
 				.insert([defaultSettings])
-				.select()
-				.single();
+				.select();
 
 			if (insertError) {
 				console.error('Erro ao criar configurações:', insertError);
 				return;
 			}
 
-			userSettings = newSettings;
+			userSettings = newSettings[0];
 		}
 
 		// Aplica o tema salvo
@@ -165,6 +177,9 @@ async function loadUserSettings() {
 		
 		// Atualiza o formulário com as configurações atuais
 		updateSettingsForm();
+		
+		// Atualiza as informações do usuário
+		updateUserInfo();
 	} catch (error) {
 		console.error('Erro ao carregar configurações:', error);
 	}
@@ -191,6 +206,92 @@ async function handleLogout() {
 	}
 }
 
+// Função para mostrar notificações
+function showNotification(type, title, message, duration = 5000) {
+	const container = document.getElementById('notifications-container');
+	const notification = document.createElement('div');
+	notification.className = `notification ${type}`;
+	
+	let icon = '';
+	switch(type) {
+		case 'success':
+			icon = 'check-circle';
+			break;
+		case 'error':
+			icon = 'times-circle';
+			break;
+		case 'warning':
+			icon = 'exclamation-circle';
+			break;
+	}
+	
+	notification.innerHTML = `
+		<i class="fas fa-${icon}"></i>
+		<div class="notification-content">
+			<div class="notification-title">${title}</div>
+			<div class="notification-message">${message}</div>
+		</div>
+		<div class="notification-close">
+			<i class="fas fa-times"></i>
+		</div>
+	`;
+	
+	container.appendChild(notification);
+	
+	// Adicionar evento de clique para fechar
+	notification.querySelector('.notification-close').addEventListener('click', () => {
+		notification.style.animation = 'slideOut 0.3s ease forwards';
+		setTimeout(() => {
+			container.removeChild(notification);
+		}, 300);
+	});
+	
+	// Remover automaticamente após a duração especificada
+	setTimeout(() => {
+		if (notification.parentElement) {
+			notification.style.animation = 'slideOut 0.3s ease forwards';
+			setTimeout(() => {
+				if (notification.parentElement) {
+					container.removeChild(notification);
+				}
+			}, 300);
+		}
+	}, duration);
+}
+
+// Função para confirmar ação
+function showConfirmation(title, message) {
+	return new Promise((resolve) => {
+		const container = document.getElementById('notifications-container');
+		const notification = document.createElement('div');
+		notification.className = 'notification warning';
+		
+		notification.innerHTML = `
+			<i class="fas fa-question-circle"></i>
+			<div class="notification-content">
+				<div class="notification-title">${title}</div>
+				<div class="notification-message">${message}</div>
+				<div class="notification-actions" style="margin-top: 10px;">
+					<button class="btn btn-sm btn-primary confirm-yes">Sim</button>
+					<button class="btn btn-sm btn-secondary confirm-no">Não</button>
+				</div>
+			</div>
+		`;
+		
+		container.appendChild(notification);
+		
+		notification.querySelector('.confirm-yes').addEventListener('click', () => {
+			container.removeChild(notification);
+			resolve(true);
+		});
+		
+		notification.querySelector('.confirm-no').addEventListener('click', () => {
+			container.removeChild(notification);
+			resolve(false);
+		});
+	});
+}
+
 async function handleTransactionSubmit(e) {
 	e.preventDefault();
 	
@@ -202,12 +303,15 @@ async function handleTransactionSubmit(e) {
 		amount = -Math.abs(amount);
 	}
 
+	const [year, month, day] = form.date.value.split('-');
+	const formattedDate = `${year}-${month}-${day}`;
+
 	const transaction = {
 		description: form.description.value,
 		amount,
 		type: type,
 		category: form.category.value,
-		date: form.date.value,
+		date: formattedDate,
 		user_id: currentUser.id
 	};
 
@@ -220,10 +324,8 @@ async function handleTransactionSubmit(e) {
 
 		if (error) throw error;
 
-		// Atualiza o array local de transações
 		window.transactions = [data, ...window.transactions];
 		
-		// Atualiza todas as interfaces
 		updateUI();
 		updateDashboardUI();
 		updateTransactionsList(window.transactions);
@@ -232,43 +334,49 @@ async function handleTransactionSubmit(e) {
 		
 		toggleModal(false);
 		form.reset();
+		
+		showNotification('success', 'Sucesso', 'Transação adicionada com sucesso');
 	} catch (error) {
 		console.error('Erro ao salvar transação:', error);
-		alert('Erro ao salvar transação. Por favor, tente novamente.');
+		showNotification('error', 'Erro', 'Erro ao salvar transação. Por favor, tente novamente.');
 	}
 }
 
 async function handleSettingsSubmit(e) {
 	e.preventDefault();
 	
+	const displayName = document.getElementById('displayName').value.trim();
+	
+	if (!displayName) {
+		showNotification('error', 'Erro', 'O nome de usuário não pode estar vazio.');
+		return;
+	}
+
 	const newSettings = {
 		currency: e.target.currency.value,
 		theme: e.target.theme.value,
+		display_name: displayName,
 		user_id: currentUser.id
 	};
 
 	try {
-		// Atualiza as configurações existentes
-		const { error } = await supabase
+		const { data: updatedSettings, error } = await supabase
 			.from('user_settings')
 			.update(newSettings)
-			.eq('user_id', currentUser.id);
+			.eq('user_id', currentUser.id)
+			.select();
 
 		if (error) throw error;
 
-		// Atualiza as configurações locais
-		userSettings = newSettings;
-		
-		// Aplica o novo tema
+		userSettings = updatedSettings[0];
 		applyTheme(newSettings.theme);
-		
-		// Atualiza o formulário
 		updateSettingsForm();
+		updateUserInfo();
 		
-		alert('Configurações salvas com sucesso!');
+		showNotification('success', 'Sucesso', 'Configurações salvas com sucesso');
 	} catch (error) {
 		console.error('Erro ao salvar configurações:', error);
-		alert('Erro ao salvar configurações. Por favor, tente novamente.');
+		showNotification('error', 'Erro', 'Erro ao salvar configurações. Por favor, tente novamente.');
 	}
 }
 
@@ -772,9 +880,12 @@ function handleTransactionFilter() {
 
 // Manipulação de Transações
 async function handleDeleteTransaction(id) {
-	if (!confirm('Tem certeza que deseja excluir esta transação?')) {
-		return;
-	}
+	const confirmed = await showConfirmation(
+		'Confirmar Exclusão',
+		'Tem certeza que deseja excluir esta transação?'
+	);
+
+	if (!confirmed) return;
 
 	try {
 		const { error } = await supabase
@@ -784,19 +895,18 @@ async function handleDeleteTransaction(id) {
 
 		if (error) throw error;
 
-		// Atualiza o array local de transações
 		window.transactions = window.transactions.filter(t => t.id !== id);
 		
-		// Atualiza todas as interfaces
 		updateUI();
 		updateDashboardUI();
 		updateTransactionsList(window.transactions);
 		updateCharts();
 		updateCards();
 		
+		showNotification('success', 'Sucesso', 'Transação excluída com sucesso');
 	} catch (error) {
 		console.error('Erro ao deletar transação:', error);
-		alert('Erro ao deletar transação. Por favor, tente novamente.');
+		showNotification('error', 'Erro', 'Erro ao deletar transação. Por favor, tente novamente.');
 	}
 }
 
@@ -941,12 +1051,15 @@ async function handleEditTransactionSubmit(e) {
 		amount = -Math.abs(amount);
 	}
 
+	const [year, month, day] = form.querySelector('#editDate').value.split('-');
+	const formattedDate = `${year}-${month}-${day}`;
+
 	const transaction = {
 		description: form.querySelector('#editDescription').value,
 		amount,
 		type,
 		category: form.querySelector('#editCategory').value,
-		date: form.querySelector('#editDate').value
+		date: formattedDate
 	};
 
 	try {
@@ -959,27 +1072,205 @@ async function handleEditTransactionSubmit(e) {
 
 		if (error) throw error;
 
-		// Atualiza a transação no array local
 		const index = window.transactions.findIndex(t => t.id === id);
 		if (index !== -1) {
 			window.transactions[index] = data;
 		}
 
-		// Recarrega os dados para garantir sincronização
 		await loadTransactions();
 
-		// Atualiza todas as interfaces
 		updateUI();
 		updateDashboardUI();
 		updateTransactionsList(window.transactions);
 		updateCharts();
 		updateCards();
 		
-		// Fecha o modal e mostra mensagem de sucesso
 		toggleEditModal(false);
-		alert('Transação atualizada com sucesso!');
+		showNotification('success', 'Sucesso', 'Transação atualizada com sucesso');
 	} catch (error) {
 		console.error('Erro ao editar transação:', error);
-		alert('Erro ao editar transação. Por favor, tente novamente.');
+		showNotification('error', 'Erro', 'Erro ao editar transação. Por favor, tente novamente.');
+	}
+}
+
+// Atualizar informações do usuário
+function updateUserInfo() {
+	const userDisplayName = document.getElementById('userDisplayName');
+	const mobileUserName = document.getElementById('mobileUserName');
+	const displayNameInput = document.getElementById('displayName');
+	const accountEmail = document.getElementById('accountEmail');
+	const accountCreated = document.getElementById('accountCreated');
+	
+	if (currentUser) {
+		const displayName = userSettings?.display_name || '';
+		
+		// Atualiza o nome na sidebar
+		if (userDisplayName) {
+			userDisplayName.textContent = displayName;
+		}
+		
+		// Atualiza o nome na versão mobile
+		if (mobileUserName) {
+			mobileUserName.textContent = displayName;
+		}
+		
+		// Atualiza as informações na página de configurações
+		if (displayNameInput) {
+			displayNameInput.value = displayName;
+		}
+		if (accountEmail) {
+			accountEmail.textContent = currentUser.email;
+		}
+		if (accountCreated) {
+			const createdDate = new Date(currentUser.created_at);
+			accountCreated.textContent = createdDate.toLocaleDateString('pt-BR', {
+				day: '2-digit',
+				month: 'long',
+				year: 'numeric'
+			});
+		}
+	}
+}
+
+// Função para deletar conta
+async function handleDeleteAccount() {
+	const confirmed = await showConfirmation(
+		'Excluir Conta',
+		'Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita e todos os seus dados serão perdidos.'
+	);
+
+	if (!confirmed) return;
+
+	try {
+		// Primeiro, deletar todas as transações do usuário
+		const { error: transError } = await supabase
+			.from('transactions')
+			.delete()
+			.eq('user_id', currentUser.id);
+		
+		if (transError) throw transError;
+
+		// Deletar as configurações do usuário
+		const { error: settingsError } = await supabase
+			.from('user_settings')
+			.delete()
+			.eq('user_id', currentUser.id);
+		
+		if (settingsError) throw settingsError;
+
+		// Por fim, deletar o usuário
+		const { error: userError } = await supabase.auth.admin.deleteUser(currentUser.id);
+		
+		if (userError) throw userError;
+
+		// Fazer logout e redirecionar para a página de login
+		await supabase.auth.signOut();
+		window.location.href = '/auth.html';
+	} catch (error) {
+		console.error('Erro ao deletar conta:', error);
+		showNotification('error', 'Erro', 'Não foi possível deletar sua conta. Por favor, tente novamente.');
+	}
+}
+
+// Modal de Boas-vindas
+function showWelcomeModal() {
+	const modal = document.createElement('div');
+	modal.className = 'modal active';
+	modal.id = 'welcomeModal';
+	
+	modal.innerHTML = `
+		<div class="modal-content">
+			<div class="modal-header">
+				<div class="welcome-icon">
+					<i class="fas fa-wallet"></i>
+				</div>
+				<h3>Bem-vindo ao FinanceUP!</h3>
+				<p class="welcome-subtitle">Seu assistente financeiro pessoal</p>
+			</div>
+			<div class="modal-body">
+				<div class="welcome-message">
+					<i class="fas fa-user-circle"></i>
+					<p>Para começar a usar o app, por favor escolha um nome de usuário:</p>
+				</div>
+				<form id="welcomeForm">
+					<div class="form-group">
+						<div class="input-icon">
+							<i class="fas fa-user"></i>
+							<input type="text" id="welcomeDisplayName" class="edit-input" 
+								maxlength="30" placeholder="Seu nome de usuário" required>
+						</div>
+					</div>
+					<div class="form-actions">
+						<button type="submit" class="btn btn-primary">
+							<i class="fas fa-check-circle"></i>
+							Começar
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	`;
+	
+	document.body.appendChild(modal);
+	
+	const form = document.getElementById('welcomeForm');
+	form.addEventListener('submit', handleWelcomeSubmit);
+}
+
+async function handleWelcomeSubmit(e) {
+	e.preventDefault();
+	
+	const displayName = document.getElementById('welcomeDisplayName').value.trim();
+	
+	if (!displayName) {
+		showNotification('error', 'Erro', 'O nome de usuário não pode estar vazio.');
+		return;
+	}
+
+	try {
+		// Se não existir configurações, criar uma nova
+		if (!userSettings) {
+			const defaultSettings = {
+				currency: 'BRL',
+				theme: 'light',
+				display_name: displayName,
+				user_id: currentUser.id
+			};
+			
+			const { data: newSettings, error: insertError } = await supabase
+				.from('user_settings')
+				.insert([defaultSettings])
+				.select();
+
+			if (insertError) throw insertError;
+			userSettings = newSettings[0];
+		} else {
+			// Se já existir, apenas atualiza
+			const { data: updatedSettings, error } = await supabase
+				.from('user_settings')
+				.update({ display_name: displayName })
+				.eq('user_id', currentUser.id)
+				.select();
+
+			if (error) throw error;
+			userSettings = updatedSettings[0];
+		}
+
+		// Atualiza a interface
+		updateUserInfo();
+		
+		// Remove o modal de boas-vindas com animação
+		const modal = document.getElementById('welcomeModal');
+		modal.style.animation = 'fadeOut 0.3s ease forwards';
+		setTimeout(() => {
+			if (modal && modal.parentElement) {
+				document.body.removeChild(modal);
+			}
+		}, 300);
+		
+		showNotification('success', 'Bem-vindo!', 'Nome de usuário definido com sucesso!');
+	} catch (error) {
+		console.error('Erro ao salvar nome de usuário:', error);
+		showNotification('error', 'Erro', 'Não foi possível salvar o nome de usuário. Por favor, tente novamente.');
 	}
 }
