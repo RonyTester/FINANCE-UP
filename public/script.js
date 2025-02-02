@@ -263,6 +263,17 @@ function showNotification(type, title, message, duration = 5000) {
 function showConfirmation(title, message) {
 	return new Promise((resolve) => {
 		const container = document.getElementById('notifications-container');
+		if (!container) {
+			console.error('Container de notificações não encontrado');
+			return resolve(false);
+		}
+
+		// Remove qualquer confirmação anterior que possa existir
+		const existingConfirmation = container.querySelector('.notification.warning');
+		if (existingConfirmation) {
+			container.removeChild(existingConfirmation);
+		}
+
 		const notification = document.createElement('div');
 		notification.className = 'notification warning';
 		
@@ -271,7 +282,7 @@ function showConfirmation(title, message) {
 			<div class="notification-content">
 				<div class="notification-title">${title}</div>
 				<div class="notification-message">${message}</div>
-				<div class="notification-actions" style="margin-top: 10px;">
+				<div class="notification-actions">
 					<button class="btn btn-sm btn-primary confirm-yes">Sim</button>
 					<button class="btn btn-sm btn-secondary confirm-no">Não</button>
 				</div>
@@ -279,16 +290,42 @@ function showConfirmation(title, message) {
 		`;
 		
 		container.appendChild(notification);
-		
-		notification.querySelector('.confirm-yes').addEventListener('click', () => {
-			container.removeChild(notification);
+
+		const handleYes = () => {
+			cleanup();
 			resolve(true);
-		});
-		
-		notification.querySelector('.confirm-no').addEventListener('click', () => {
-			container.removeChild(notification);
+		};
+
+		const handleNo = () => {
+			cleanup();
 			resolve(false);
-		});
+		};
+
+		const cleanup = () => {
+			yesButton.removeEventListener('click', handleYes);
+			noButton.removeEventListener('click', handleNo);
+			if (notification.parentElement) {
+				notification.style.animation = 'slideOut 0.3s ease forwards';
+				setTimeout(() => {
+					if (notification.parentElement) {
+						container.removeChild(notification);
+					}
+				}, 300);
+			}
+		};
+		
+		const yesButton = notification.querySelector('.confirm-yes');
+		const noButton = notification.querySelector('.confirm-no');
+		
+		yesButton.addEventListener('click', handleYes);
+		noButton.addEventListener('click', handleNo);
+
+		// Auto-close após 30 segundos
+		setTimeout(() => {
+			if (notification.parentElement) {
+				handleNo();
+			}
+		}, 30000);
 	});
 }
 
@@ -880,6 +917,11 @@ function handleTransactionFilter() {
 
 // Manipulação de Transações
 async function handleDeleteTransaction(id) {
+	if (!id || !currentUser) {
+		console.error('ID da transação ou usuário não fornecido');
+		return;
+	}
+
 	const confirmed = await showConfirmation(
 		'Confirmar Exclusão',
 		'Tem certeza que deseja excluir esta transação?'
@@ -891,7 +933,8 @@ async function handleDeleteTransaction(id) {
 		const { error } = await supabase
 			.from('transactions')
 			.delete()
-			.eq('id', id);
+			.eq('id', id)
+			.eq('user_id', currentUser.id);
 
 		if (error) throw error;
 
