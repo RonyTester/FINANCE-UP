@@ -24,6 +24,10 @@
 					<i class="fas fa-chart-line"></i>
 					Dashboard
 				</a>
+				<a href="#" class="nav-item" data-page="fixed-expenses">
+					<i class="fas fa-calendar-check"></i>
+					Despesas Fixas
+				</a>
 				<a href="#" class="nav-item" data-page="transactions">
 					<i class="fas fa-exchange-alt"></i>
 					Transações
@@ -145,6 +149,33 @@
 						</div>
 
 						<div class="transactions-list" id="transactionsList"></div>
+					</div>
+				</section>
+
+				<!-- Fixed Expenses -->
+				<section id="fixed-expenses-page" class="page">
+					<div class="page-header">
+						<h2>Despesas Fixas</h2>
+						<button id="newFixedExpenseBtn" class="btn btn-primary">
+							<i class="fas fa-plus"></i>
+							Nova Despesa Fixa
+						</button>
+					</div>
+
+					<div class="fixed-expenses-container">
+						<div class="progress-card">
+							<h3>Progresso do Mês</h3>
+							<div class="progress-bar">
+								<div class="progress" id="fixedExpensesProgress" style="width: 0%"></div>
+							</div>
+							<div class="progress-info">
+								<span id="paidExpensesCount">0</span> de <span id="totalExpensesCount">0</span> despesas pagas
+							</div>
+						</div>
+
+						<div class="fixed-expenses-list" id="fixedExpensesList">
+							<!-- Lista de despesas fixas será preenchida via JavaScript -->
+						</div>
 					</div>
 				</section>
 
@@ -302,6 +333,88 @@
 					</div>
 				</form>
 			</div>
+		</div>
+	</div>
+
+	<!-- Modal Nova Despesa Fixa -->
+	<div id="fixedExpenseModal" class="modal">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Nova Despesa Fixa</h3>
+				<button class="close-modal">&times;</button>
+			</div>
+			<form id="fixedExpenseForm">
+				<div class="form-group">
+					<label for="fixedExpenseDescription">Descrição</label>
+					<input type="text" id="fixedExpenseDescription" required>
+				</div>
+				<div class="form-group">
+					<label for="fixedExpenseAmount">Valor</label>
+					<input type="number" id="fixedExpenseAmount" step="0.01" required>
+				</div>
+				<div class="form-group">
+					<label for="fixedExpenseCategory">Categoria</label>
+					<select id="fixedExpenseCategory" required>
+						<option value="Aluguel">Aluguel</option>
+						<option value="Internet">Internet</option>
+						<option value="Energia">Energia</option>
+						<option value="Água">Água</option>
+						<option value="Telefone">Telefone</option>
+						<option value="Streaming">Streaming</option>
+						<option value="Academia">Academia</option>
+						<option value="Outros">Outros</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="fixedExpenseDueDay">Dia de Vencimento</label>
+					<input type="number" id="fixedExpenseDueDay" min="1" max="31" required>
+				</div>
+				<div class="form-group">
+					<label for="fixedExpenseNotificationDays">Notificar com quantos dias de antecedência?</label>
+					<input type="number" id="fixedExpenseNotificationDays" min="0" max="30" value="3">
+				</div>
+				<div class="form-group">
+					<label for="fixedExpenseNotes">Observações</label>
+					<textarea id="fixedExpenseNotes" rows="3"></textarea>
+				</div>
+				<div class="form-actions">
+					<button type="button" class="btn btn-secondary cancel-modal">Cancelar</button>
+					<button type="submit" class="btn btn-primary">Salvar</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Modal de Pagamento de Despesa Fixa -->
+	<div id="fixedExpensePaymentModal" class="modal">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Registrar Pagamento</h3>
+				<button class="close-modal">&times;</button>
+			</div>
+			<form id="fixedExpensePaymentForm">
+				<input type="hidden" id="paymentFixedExpenseId">
+				<div class="form-group">
+					<label for="paymentAmount">Valor do Pagamento</label>
+					<input type="number" id="paymentAmount" step="0.01" required>
+				</div>
+				<div class="form-group">
+					<label for="paymentDate">Data do Pagamento</label>
+					<input type="date" id="paymentDate" required>
+				</div>
+				<div class="form-group">
+					<label for="paymentProof">Comprovante (URL)</label>
+					<input type="url" id="paymentProof">
+				</div>
+				<div class="form-group">
+					<label for="paymentNotes">Observações</label>
+					<textarea id="paymentNotes" rows="3"></textarea>
+				</div>
+				<div class="form-actions">
+					<button type="button" class="btn btn-secondary cancel-modal">Cancelar</button>
+					<button type="submit" class="btn btn-primary">Registrar Pagamento</button>
+				</div>
+			</form>
 		</div>
 	</div>
 

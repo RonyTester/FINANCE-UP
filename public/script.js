@@ -3,6 +3,7 @@ let currentUser = null;
 let transactions = [];
 let userSettings = null;
 let isFirstLogin = false;
+let fixedExpenses = []; // Adicionado para despesas fixas
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', async () => {
@@ -91,6 +92,18 @@ function setupEventListeners() {
 
 	// Adicionar listener para o botão de deletar conta
 	document.getElementById('deleteAccountBtn')?.addEventListener('click', handleDeleteAccount);
+
+	// Event listeners para Despesas Fixas
+	document.getElementById('newFixedExpenseBtn')?.addEventListener('click', () => toggleFixedExpenseModal(true));
+	document.getElementById('fixedExpenseForm')?.addEventListener('submit', saveFixedExpense);
+	document.querySelectorAll('#fixedExpenseModal .close-modal, #fixedExpenseModal .cancel-modal').forEach(element => {
+		element?.addEventListener('click', () => toggleFixedExpenseModal(false));
+	});
+
+	document.getElementById('fixedExpensePaymentForm')?.addEventListener('submit', handlePaymentSubmit);
+	document.querySelectorAll('#fixedExpensePaymentModal .close-modal, #fixedExpensePaymentModal .cancel-modal').forEach(element => {
+		element?.addEventListener('click', () => togglePaymentModal(false));
+	});
 }
 
 // Carregamento de Dados
@@ -98,7 +111,8 @@ async function loadUserData() {
 	try {
 		await Promise.all([
 			loadTransactions(),
-			loadUserSettings()
+			loadUserSettings(),
+			loadFixedExpenses() // Adicionado carregamento de despesas fixas
 		]);
 		updateUI();
 	} catch (error) {
@@ -182,6 +196,418 @@ async function loadUserSettings() {
 		updateUserInfo();
 	} catch (error) {
 		console.error('Erro ao carregar configurações:', error);
+	}
+}
+
+// Funções para Despesas Fixas
+async function loadFixedExpenses() {
+	try {
+		const { data: expenses, error } = await supabase
+			.from('fixed_expenses')
+			.select(`
+				id,
+				description,
+				amount,
+				category,
+				due_day,
+				notification_days,
+				notes,
+				user_id,
+				payments:fixed_expense_payments(*)
+			`)
+			.eq('user_id', currentUser.id)
+			.order('due_day');
+
+		if (error) throw error;
+
+		fixedExpenses = expenses || [];
+		console.log('Despesas fixas carregadas:', fixedExpenses); // Debug
+		updateFixedExpensesList();
+		updateFixedExpensesProgress();
+		checkDueExpenses();
+	} catch (error) {
+		console.error('Erro ao carregar despesas fixas:', error);
+		showNotification('error', 'Erro', 'Erro ao carregar despesas fixas');
+	}
+}
+
+function updateFixedExpensesList() {
+	const container = document.getElementById('fixedExpensesList');
+	if (!container) return;
+
+	const currentDate = new Date();
+	const currentMonth = currentDate.getMonth();
+	const currentYear = currentDate.getFullYear();
+
+	// Adicionar cabeçalho com o mês atual
+	const monthNames = [
+		'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+		'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+	];
+
+	if (!fixedExpenses.length) {
+		container.innerHTML = `
+			<div class="no-transactions">
+				<p>Nenhuma despesa fixa cadastrada.</p>
+				<button class="btn btn-primary" onclick="toggleFixedExpenseModal(true)">
+					<i class="fas fa-plus"></i>
+					Adicionar Despesa Fixa
+				</button>
+			</div>
+		`;
+		return;
+	}
+
+	container.innerHTML = `
+		<div class="month-header">
+			<h3>Despesas Fixas - ${monthNames[currentMonth]} de ${currentYear}</h3>
+			<small>As despesas são renovadas automaticamente todo mês</small>
+		</div>
+		${fixedExpenses.map(expense => {
+			// Calcular total pago no mês atual
+			const currentMonthPayments = expense.payments?.filter(payment => {
+				const paymentDate = new Date(payment.date);
+				return paymentDate.getMonth() === currentMonth && 
+					   paymentDate.getFullYear() === currentYear;
+			}) || [];
+
+			const totalPaid = currentMonthPayments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+			const isPaidFull = totalPaid >= Number(expense.amount);
+			const isPaidPartial = totalPaid > 0 && totalPaid < Number(expense.amount);
+			const remainingAmount = Number(expense.amount) - totalPaid;
+
+			const dueDate = new Date(currentYear, currentMonth, expense.due_day);
+			const isOverdue = !isPaidFull && dueDate < currentDate;
+			const daysUntilDue = Math.ceil((dueDate - currentDate) / (1000 * 60 * 60 * 24));
+			
+			let statusClass = isPaidFull ? 'paid' : (isPaidPartial ? 'partial' : (isOverdue ? 'overdue' : ''));
+			let statusText = isPaidFull ? 'Pago' : 
+							(isPaidPartial ? `Pago Parcialmente (${formatCurrency(totalPaid)})` : 
+							(isOverdue ? 'Atrasado' : `Vence em ${daysUntilDue} dias`));
+
+			return `
+				<div class="fixed-expense-item ${statusClass}">
+					<div class="expense-info">
+						<strong>${expense.description}</strong>
+						<div>${expense.category}</div>
+						<small>Vence dia ${expense.due_day}</small>
+						<div class="expense-status">${statusText}</div>
+						${isPaidPartial ? `
+							<div class="payment-progress">
+								<div class="progress-bar">
+									<div class="progress" style="width: ${(totalPaid / Number(expense.amount)) * 100}%"></div>
+								</div>
+								<small>Falta: ${formatCurrency(remainingAmount)}</small>
+							</div>
+						` : ''}
+						${expense.notes ? `<div class="expense-notes">${expense.notes}</div>` : ''}
+					</div>
+					<div class="expense-amount">
+						${formatCurrency(expense.amount)}
+						<div class="expense-actions">
+							${!isPaidFull ? `
+								<button class="btn btn-sm btn-success pay-btn" onclick="showPaymentModal(${expense.id}, ${remainingAmount})">
+									<i class="fas fa-${isPaidPartial ? 'plus' : 'check'}"></i>
+								</button>
+							` : `
+								<button class="btn btn-sm btn-info" onclick="showPaymentHistory(${expense.id})">
+									<i class="fas fa-history"></i>
+								</button>
+							`}
+							<button class="btn btn-sm btn-danger delete-btn" onclick="deleteFixedExpense(${expense.id})">
+								<i class="fas fa-trash"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+			`;
+		}).join('')}
+	`;
+}
+
+// Adicionar estilos para o cabeçalho do mês
+const style = document.createElement('style');
+style.textContent = `
+	.month-header {
+		padding: 1rem;
+		background: var(--bg-secondary);
+		border-radius: 0.5rem;
+		margin-bottom: 1rem;
+		text-align: center;
+	}
+	.month-header h3 {
+		color: var(--text-primary);
+		margin-bottom: 0.5rem;
+	}
+	.month-header small {
+		color: var(--text-secondary);
+		font-style: italic;
+	}
+`;
+document.head.appendChild(style);
+
+function checkDueExpenses() {
+	const currentDate = new Date();
+	const currentDay = currentDate.getDate();
+	const currentMonth = currentDate.getMonth();
+	const currentYear = currentDate.getFullYear();
+
+	fixedExpenses.forEach(expense => {
+		const isPaid = expense.payments?.some(payment => {
+			const paymentDate = new Date(payment.date);
+			return paymentDate.getMonth() === currentMonth && 
+				   paymentDate.getFullYear() === currentYear;
+		});
+
+		if (!isPaid) {
+			const dueDate = new Date(currentYear, currentMonth, expense.due_day);
+			const daysUntilDue = Math.ceil((dueDate - currentDate) / (1000 * 60 * 60 * 24));
+
+			if (daysUntilDue <= expense.notification_days && daysUntilDue >= 0) {
+				showNotification(
+					'warning',
+					'Despesa Próxima do Vencimento',
+					`${expense.description} vence em ${daysUntilDue} dias. Valor: ${formatCurrency(expense.amount)}`
+				);
+			}
+		}
+	});
+}
+
+function toggleFixedExpenseModal(show) {
+	const modal = document.getElementById('fixedExpenseModal');
+	if (show) {
+		modal.classList.add('active');
+	} else {
+		modal.classList.remove('active');
+		document.getElementById('fixedExpenseForm').reset();
+	}
+}
+
+async function saveFixedExpense(event) {
+	event.preventDefault();
+	
+	try {
+		const formData = {
+			description: document.getElementById('fixedExpenseDescription').value,
+			amount: parseFloat(document.getElementById('fixedExpenseAmount').value),
+			category: document.getElementById('fixedExpenseCategory').value,
+			due_day: parseInt(document.getElementById('fixedExpenseDueDay').value),
+			notification_days: parseInt(document.getElementById('fixedExpenseNotificationDays').value),
+			notes: document.getElementById('fixedExpenseNotes').value,
+			user_id: currentUser.id
+		};
+
+		// Validações
+		if (!formData.description || !formData.amount || !formData.category || !formData.due_day) {
+			throw new Error('Todos os campos obrigatórios devem ser preenchidos');
+		}
+
+		if (isNaN(formData.amount) || formData.amount <= 0) {
+			throw new Error('O valor deve ser um número positivo');
+		}
+
+		if (formData.due_day < 1 || formData.due_day > 31) {
+			throw new Error('O dia de vencimento deve ser entre 1 e 31');
+		}
+
+		const { data, error } = await supabase
+			.from('fixed_expenses')
+			.insert([formData])
+			.select()
+			.single();
+
+		if (error) throw error;
+
+		fixedExpenses.push({ ...data, payments: [] });
+		updateFixedExpensesList();
+		updateFixedExpensesProgress();
+		toggleFixedExpenseModal(false);
+		document.getElementById('fixedExpenseForm').reset();
+		
+		showNotification('success', 'Sucesso', 'Despesa fixa cadastrada com sucesso!');
+	} catch (error) {
+		console.error('Erro ao salvar despesa fixa:', error);
+		showNotification('error', 'Erro', error.message || 'Erro ao salvar despesa fixa');
+	}
+}
+
+function showPaymentModal(expenseId, defaultAmount) {
+	console.log('Tentando abrir modal para despesa:', expenseId); // Debug
+	console.log('Lista de despesas:', fixedExpenses); // Debug
+	
+	const modal = document.getElementById('fixedExpensePaymentModal');
+	// Converter expenseId para número se for string
+	const expenseIdNumber = typeof expenseId === 'string' ? parseInt(expenseId) : expenseId;
+	const expense = fixedExpenses.find(e => e.id === expenseIdNumber);
+	
+	if (!expense) {
+		console.error('Despesa não encontrada:', expenseId);
+		showNotification('error', 'Erro', 'Não foi possível encontrar a despesa selecionada.');
+		return;
+	}
+
+	const currentDate = new Date();
+	const currentMonth = currentDate.getMonth();
+	const currentYear = currentDate.getFullYear();
+
+	// Calcular total já pago no mês atual
+	const currentMonthPayments = expense.payments?.filter(payment => {
+		const paymentDate = new Date(payment.date);
+		return paymentDate.getMonth() === currentMonth && 
+			   paymentDate.getFullYear() === currentYear;
+	}) || [];
+
+	const totalPaid = currentMonthPayments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+	const remainingAmount = Number(expense.amount) - totalPaid;
+
+	document.getElementById('paymentFixedExpenseId').value = expenseIdNumber; // Garantir que é número
+	const amountInput = document.getElementById('paymentAmount');
+	amountInput.value = defaultAmount || remainingAmount;
+	amountInput.max = remainingAmount;
+	
+	// Definir a data atual como padrão
+	const today = new Date().toISOString().split('T')[0];
+	document.getElementById('paymentDate').value = today;
+	
+	// Limpar campos opcionais
+	document.getElementById('paymentProof').value = '';
+	document.getElementById('paymentNotes').value = '';
+	
+	modal.classList.add('active');
+
+	// Remover listener anterior se existir
+	const oldListener = amountInput._validateListener;
+	if (oldListener) {
+		amountInput.removeEventListener('input', oldListener);
+	}
+
+	// Adicionar novo listener de validação
+	const validateListener = function() {
+		const value = Number(this.value);
+		if (value > remainingAmount) {
+			this.value = remainingAmount;
+			showNotification('warning', 'Atenção', `O valor máximo permitido é ${formatCurrency(remainingAmount)}`);
+		}
+	};
+	amountInput.addEventListener('input', validateListener);
+	amountInput._validateListener = validateListener;
+}
+
+async function handlePaymentSubmit(event) {
+	event.preventDefault();
+	
+	try {
+		const expenseId = parseInt(document.getElementById('paymentFixedExpenseId').value);
+		const expense = fixedExpenses.find(e => e.id === expenseId);
+
+		if (!expense) {
+			console.error('Despesa não encontrada. ID:', expenseId, 'Lista de despesas:', fixedExpenses);
+			throw new Error('Despesa não encontrada');
+		}
+
+		const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
+		const currentDate = new Date();
+		const currentMonth = currentDate.getMonth();
+		const currentYear = currentDate.getFullYear();
+
+		// Calcular total já pago no mês atual
+		const currentMonthPayments = expense.payments?.filter(payment => {
+			const paymentDate = new Date(payment.date);
+			return paymentDate.getMonth() === currentMonth && 
+				   paymentDate.getFullYear() === currentYear;
+		}) || [];
+
+		const totalPaid = currentMonthPayments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+		const remainingAmount = Number(expense.amount) - totalPaid;
+
+		// Validar valor do pagamento
+		if (paymentAmount > remainingAmount) {
+			throw new Error(`O valor máximo permitido é ${formatCurrency(remainingAmount)}`);
+		}
+
+		const payment = {
+			fixed_expense_id: expenseId,
+			user_id: currentUser.id,
+			amount: paymentAmount,
+			date: document.getElementById('paymentDate').value,
+			payment_proof: document.getElementById('paymentProof').value,
+			notes: document.getElementById('paymentNotes').value
+		};
+
+		const { data, error } = await supabase
+			.from('fixed_expense_payments')
+			.insert([payment])
+			.select()
+			.single();
+
+		if (error) throw error;
+
+		// Atualizar o estado local
+		const expenseIndex = fixedExpenses.findIndex(e => e.id === expenseId);
+		if (expenseIndex !== -1) {
+			if (!fixedExpenses[expenseIndex].payments) {
+				fixedExpenses[expenseIndex].payments = [];
+			}
+			fixedExpenses[expenseIndex].payments.push(data);
+		}
+
+		// Atualizar a interface imediatamente
+		updateFixedExpensesList();
+		updateFixedExpensesProgress();
+		togglePaymentModal(false);
+		document.getElementById('fixedExpensePaymentForm').reset();
+		
+		const isPaidFull = totalPaid + paymentAmount >= Number(expense.amount);
+		showNotification(
+			'success', 
+			'Sucesso', 
+			isPaidFull ? 'Pagamento registrado com sucesso! Despesa totalmente paga.' :
+						`Pagamento parcial registrado com sucesso! Falta ${formatCurrency(remainingAmount - paymentAmount)}`
+		);
+	} catch (error) {
+		console.error('Erro ao registrar pagamento:', error);
+		showNotification('error', 'Erro', error.message || 'Erro ao registrar pagamento');
+	}
+}
+
+async function showPaymentHistory(expenseId) {
+	const expense = fixedExpenses.find(e => e.id === expenseId);
+	if (!expense) return;
+
+	const payments = expense.payments || [];
+	const paymentsList = payments
+		.sort((a, b) => new Date(b.date) - new Date(a.date))
+		.map(payment => `
+			<div class="payment-history-item">
+				<div class="payment-info">
+					<strong>${formatDate(payment.date)}</strong>
+					<div>${formatCurrency(payment.amount)}</div>
+					${payment.notes ? `<small>${payment.notes}</small>` : ''}
+				</div>
+				${payment.payment_proof ? `
+					<a href="${payment.payment_proof}" target="_blank" class="btn btn-sm btn-info">
+						<i class="fas fa-receipt"></i>
+					</a>
+				` : ''}
+			</div>
+		`).join('');
+
+	showNotification(
+		'info',
+		`Histórico de Pagamentos - ${expense.description}`,
+		paymentsList || 'Nenhum pagamento registrado',
+		10000
+	);
+}
+
+function togglePaymentModal(show) {
+	const modal = document.getElementById('fixedExpensePaymentModal');
+	if (show) {
+		modal.classList.add('active');
+	} else {
+		modal.classList.remove('active');
+		document.getElementById('fixedExpensePaymentForm').reset();
 	}
 }
 
@@ -1316,4 +1742,68 @@ async function handleWelcomeSubmit(e) {
 		console.error('Erro ao salvar nome de usuário:', error);
 		showNotification('error', 'Erro', 'Não foi possível salvar o nome de usuário. Por favor, tente novamente.');
 	}
+}
+
+function updateFixedExpensesProgress() {
+	const progressBar = document.getElementById('fixedExpensesProgress');
+	const paidCount = document.getElementById('paidExpensesCount');
+	const totalCount = document.getElementById('totalExpensesCount');
+	
+	if (!progressBar || !paidCount || !totalCount) return;
+
+	const currentDate = new Date();
+	const currentMonth = currentDate.getMonth();
+	const currentYear = currentDate.getFullYear();
+
+	const total = fixedExpenses.length;
+	const paid = fixedExpenses.filter(expense => 
+		expense.payments?.some(payment => {
+			const paymentDate = new Date(payment.date);
+			return paymentDate.getMonth() === currentMonth && 
+				   paymentDate.getFullYear() === currentYear;
+		})
+	).length;
+
+	const percentage = total > 0 ? (paid / total) * 100 : 0;
+	
+	progressBar.style.width = `${percentage}%`;
+	paidCount.textContent = paid;
+	totalCount.textContent = total;
+}
+
+async function deleteFixedExpense(expenseId) {
+	const confirmed = await showConfirmation(
+		'Excluir Despesa Fixa',
+		'Tem certeza que deseja excluir esta despesa fixa? Todos os pagamentos relacionados também serão excluídos.'
+	);
+
+	if (!confirmed) return;
+
+	try {
+		const { error } = await supabase
+			.from('fixed_expenses')
+			.delete()
+			.eq('id', expenseId);
+
+		if (error) throw error;
+
+		// Atualiza o estado local
+		fixedExpenses = fixedExpenses.filter(e => e.id !== expenseId);
+		updateFixedExpensesList();
+		updateFixedExpensesProgress();
+		
+		showNotification('success', 'Sucesso', 'Despesa fixa excluída com sucesso!');
+	} catch (error) {
+		console.error('Erro ao excluir despesa fixa:', error);
+		showNotification('error', 'Erro', 'Erro ao excluir despesa fixa');
+	}
+}
+
+function formatDate(dateString) {
+	const date = new Date(dateString);
+	return date.toLocaleDateString('pt-BR', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric'
+	});
 }
