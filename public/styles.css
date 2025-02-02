@@ -532,91 +532,99 @@ body {
 
 /* Responsividade */
 @media (max-width: 768px) {
-	.wrapper {
-		flex-direction: column;
-		height: 100vh;
-		overflow-y: auto;
+	/* Esconder a sidebar original */
+	.sidebar {
+		display: none;
 	}
 
-	.sidebar {
+	/* Ajustar o wrapper para tela cheia */
+	.wrapper {
+		padding-left: 0;
+		padding-bottom: 60px; /* Espaço para a navegação inferior */
+	}
+
+	.main-content {
+		padding: 1rem;
+		padding-bottom: 5rem;
+		width: 100%;
+		overflow-x: hidden;
+	}
+
+	/* Ajustes do menu mobile */
+	.mobile-nav {
 		position: fixed;
 		bottom: 0;
 		left: 0;
 		right: 0;
-		width: 100%;
-		height: auto;
-		padding: 0.5rem;
-		z-index: 1000;
-		background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
+		background: var(--bg-secondary);
 		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-	}
-
-	.sidebar-header {
-		display: none;
-	}
-
-	.sidebar-nav {
+		z-index: 1000;
+		padding: 0.5rem;
 		display: flex;
-		flex-direction: row;
 		justify-content: space-around;
-		padding: 0;
-		margin: 0;
 	}
 
-	.nav-item {
-		flex: 1;
-		padding: 0.5rem;
-		font-size: 0.9rem;
-		text-align: center;
-		border-radius: 0.5rem;
-	}
-
-	.nav-item i {
-		display: block;
-		margin: 0 auto 0.25rem;
-		font-size: 1.2rem;
-	}
-
-	.btn-logout {
+	/* Estilo para o menu lateral */
+	.mobile-sidebar-content {
 		display: flex;
-		margin: 0.5rem auto 0;
-		max-width: 120px;
-		padding: 0.5rem;
-		font-size: 0.9rem;
+		flex-direction: column;
+		gap: 1rem;
 	}
 
-	.btn-logout i {
-		font-size: 1rem;
+	.mobile-sidebar-content .nav-item {
+		color: var(--text-primary);
+		text-decoration: none;
+		padding: 0.75rem 1rem;
+		border-radius: 0.5rem;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		transition: background-color 0.3s ease;
+	}
+
+	.mobile-sidebar-content .nav-item:hover {
+		background-color: rgba(0, 0, 0, 0.05);
+	}
+
+	.mobile-sidebar-content .nav-item i {
+		width: 1.5rem;
+		text-align: center;
+		font-size: 1.1rem;
+	}
+
+	.mobile-sidebar-content .btn-logout {
+		margin-top: auto;
+		width: 100%;
 	}
 
 	.main-content {
-		padding: 1rem 1rem 5rem;
-		height: calc(100vh - 60px);
-		overflow-y: auto;
+		padding: 1rem;
+		width: 100%;
 	}
 
 	/* Ajustes no Dashboard */
 	.dashboard-grid {
 		grid-template-columns: repeat(2, 1fr);
 		gap: 0.75rem;
+		margin: 0.5rem 0;
 	}
 
 	.card {
-		padding: 1rem;
+		padding: 0.75rem;
 	}
 
 	.card-icon {
-		width: 36px;
-		height: 36px;
-		font-size: 1.2rem;
+		width: 32px;
+		height: 32px;
+		font-size: 1rem;
 	}
 
 	.card-content h3 {
-		font-size: 0.8rem;
+		font-size: 0.75rem;
 	}
 
 	.card-content p {
-		font-size: 1.2rem;
+		font-size: 1rem;
 	}
 
 	/* Ajustes nos Gráficos */
@@ -684,6 +692,11 @@ body {
 	/* Adicionar botão de logout na header */
 	.page-header {
 		position: relative;
+		padding: 1rem;
+		margin-bottom: 1rem;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5rem;
 	}
 
 	.mobile-logout {
@@ -1845,65 +1858,458 @@ body {
 @media (max-width: 768px) {
     .fixed-expense-item {
         padding: 1rem;
+        position: relative;
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
         gap: 0.75rem;
+        min-height: 100px;
+        padding-right: 90px;
     }
 
-    .expense-amount {
+    .expense-info {
         width: 100%;
-        justify-content: space-between;
-    }
-
-    .expense-info strong {
-        font-size: 1rem;
     }
 
     .expense-amount {
-        font-size: 1rem;
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 0.9rem;
     }
 
-    .payment-history-item {
+    .expense-actions {
+        position: absolute;
+        right: 0.75rem;
+        top: 2.75rem;
+        display: flex;
         flex-direction: column;
         gap: 0.5rem;
     }
 
-    .payment-info {
+    .expense-actions .btn-sm {
+        width: 36px;
+        height: 36px;
+    }
+
+    .expense-notes {
         width: 100%;
+        margin-top: 0.5rem;
+        padding-right: 0;
     }
 }
 
-.payment-progress {
-    margin-top: 0.5rem;
-    padding: 0.5rem;
-    background-color: var(--bg-primary);
-    border-radius: 0.5rem;
+/* Ajustes adicionais para telas muito pequenas */
+@media (max-width: 360px) {
+    .fixed-expense-item {
+        padding: 0.75rem;
+        padding-right: 80px;
+    }
+
+    .expense-actions {
+        gap: 0.6rem;
+    }
+
+    .expense-actions .btn-sm {
+        width: 32px;
+        height: 32px;
+    }
+
+    .expense-actions {
+        right: 0.5rem;
+    }
+
+    .mobile-nav-item i {
+        font-size: 1rem;
+    }
+
+    .mobile-nav-item span {
+        font-size: 0.6rem;
+    }
 }
 
-.payment-progress .progress-bar {
-    height: 8px;
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 0.25rem;
+/* Navegação Mobile */
+@media (max-width: 768px) {
+    .mobile-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--bg-secondary);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        padding: 0.5rem;
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: var(--text-secondary);
+        text-decoration: none;
+        padding: 0.25rem;
+        font-size: 0.8rem;
+        transition: color 0.3s ease;
+    }
+
+    .mobile-nav-item i {
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .mobile-nav-item.active {
+        color: var(--primary-color);
+    }
+
+    .mobile-nav-item span {
+        font-size: 0.65rem;
+    }
+
+    /* Menu Lateral Mobile */
+    .mobile-sidebar {
+        position: fixed;
+        top: 0;
+        right: -280px;
+        width: 280px;
+        height: 100vh;
+        background: var(--bg-secondary);
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 1001;
+        transition: right 0.3s ease;
+        padding: 1rem;
+    }
+
+    .mobile-sidebar.active {
+        right: 0;
+    }
+
+    .mobile-sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .mobile-sidebar-header h3 {
+        color: var(--text-primary);
+        font-size: 1.1rem;
+    }
+
+    .mobile-sidebar-close {
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        padding: 0.5rem;
+        cursor: pointer;
+    }
+
+    .mobile-menu-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
+
+    .mobile-menu-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Ajuste do conteúdo principal para não ficar sob a navegação */
+    .main-content {
+        padding-bottom: 4.5rem;
+    }
+
+    /* Ajuste das notificações para não ficarem sob a navegação */
+    #notifications-container {
+        bottom: 80px;
+    }
 }
 
-.payment-progress .progress {
-    height: 100%;
-    background-color: #f1c40f;
-    border-radius: 4px;
-    transition: width 0.3s ease;
+/* Ajustes Gerais para Mobile */
+@media (max-width: 768px) {
+    /* Layout Base */
+    body {
+        overflow-x: hidden;
+    }
+
+    .wrapper {
+        padding-left: 0;
+        padding-bottom: 60px; /* Espaço para a navegação inferior */
+    }
+
+    .main-content {
+        padding: 1rem;
+        padding-bottom: 5rem;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Header e Navegação */
+    .page-header {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .page-header h2 {
+        font-size: 1.25rem;
+    }
+
+    /* Cards do Dashboard */
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin: 0.5rem 0;
+    }
+
+    .card {
+        padding: 0.75rem;
+    }
+
+    .card-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    .card-content h3 {
+        font-size: 0.75rem;
+    }
+
+    .card-content p {
+        font-size: 1rem;
+    }
+
+    /* Despesas Fixas */
+    .fixed-expense-item {
+        padding: 1rem;
+        min-height: 110px;
+        position: relative;
+        padding-right: 90px;
+    }
+
+    .expense-info {
+        width: 100%;
+    }
+
+    .expense-info strong {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+        padding-right: 60px;
+    }
+
+    .expense-amount {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .expense-actions {
+        position: absolute;
+        right: 0.75rem;
+        top: 2.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .expense-actions .btn-sm {
+        width: 36px;
+        height: 36px;
+    }
+
+    /* Modais */
+    .modal {
+        padding: 1rem;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: none;
+        margin: 0.5rem;
+        padding: 1rem;
+        border-radius: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        margin-bottom: 1rem;
+    }
+
+    .modal-header h2 {
+        font-size: 1.1rem;
+    }
+
+    /* Formulários */
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    /* Notificações */
+    #notifications-container {
+        left: 0.5rem;
+        right: 0.5rem;
+        bottom: 70px;
+    }
+
+    .notification {
+        padding: 0.75rem;
+        min-width: 0;
+        width: 100%;
+        max-width: none;
+    }
+
+    /* Barra de Navegação Mobile */
+    .mobile-nav {
+        height: 60px;
+        padding: 0.5rem 1rem;
+        background: var(--bg-secondary);
+        backdrop-filter: blur(10px);
+    }
+
+    .mobile-nav-item {
+        padding: 0.25rem;
+    }
+
+    .mobile-nav-item i {
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .mobile-nav-item span {
+        font-size: 0.65rem;
+    }
+
+    /* Menu Lateral */
+    .mobile-sidebar {
+        width: 85%;
+        max-width: 300px;
+    }
+
+    /* Progress Bar */
+    .progress-card {
+        margin: 0.5rem 0;
+        padding: 1rem;
+    }
+
+    .progress-bar {
+        height: 8px;
+    }
+
+    /* Ajustes de Espaçamento */
+    .fixed-expenses-container {
+        gap: 0.75rem;
+        padding: 0 0.5rem;
+    }
+
+    /* Status e Tags */
+    .expense-status {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .expense-notes {
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Histórico de Pagamentos */
+    .payment-history-item {
+        padding: 0.75rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .payment-info strong {
+        font-size: 0.85rem;
+    }
+
+    .payment-info div {
+        font-size: 0.8rem;
+    }
 }
 
-.payment-progress small {
-    display: block;
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    text-align: right;
+/* Ajustes para telas muito pequenas */
+@media (max-width: 360px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fixed-expense-item {
+        padding: 0.75rem;
+        padding-right: 80px;
+    }
+
+    .expense-actions .btn-sm {
+        width: 32px;
+        height: 32px;
+    }
+
+    .expense-actions {
+        right: 0.5rem;
+    }
+
+    .mobile-nav-item i {
+        font-size: 1rem;
+    }
+
+    .mobile-nav-item span {
+        font-size: 0.6rem;
+    }
 }
 
-.partial .expense-status {
-    background-color: rgba(241, 196, 15, 0.2);
-    color: #d35400;
+/* Ajustes de Segurança */
+@media (max-width: 768px) {
+    /* Prevenir scroll horizontal */
+    body {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+    }
+
+    .main-content {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 60px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Melhorar área de toque */
+    .btn,
+    .nav-item,
+    .mobile-nav-item,
+    .close-modal,
+    .expense-actions .btn-sm {
+        min-height: 44px;
+        min-width: 44px;
+    }
 }
 
