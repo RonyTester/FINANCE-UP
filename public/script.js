@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	await checkAuth();
 	setupEventListeners();
 	setupFilterListeners();
+	setupMobileNavigation();
 	initializeCharts();
 	await loadUserData();
 	updateUserInfo();
@@ -1806,4 +1807,101 @@ function formatDate(dateString) {
 		month: '2-digit',
 		year: 'numeric'
 	});
+}
+
+function setupMobileNavigation() {
+	// Criar a navegação móvel (apenas itens principais)
+	const mobileNav = document.createElement('nav');
+	mobileNav.className = 'mobile-nav';
+	mobileNav.innerHTML = `
+		<a href="#" class="mobile-nav-item active" data-page="dashboard">
+			<i class="fas fa-chart-line"></i>
+			<span>Dashboard</span>
+		</a>
+		<a href="#" class="mobile-nav-item" data-page="fixed-expenses">
+			<i class="fas fa-calendar-alt"></i>
+			<span>Fixas</span>
+		</a>
+		<a href="#" class="mobile-nav-item" data-page="transactions">
+			<i class="fas fa-exchange-alt"></i>
+			<span>Transações</span>
+		</a>
+		<a href="#" class="mobile-nav-item" onclick="toggleMobileSidebar()">
+			<i class="fas fa-bars"></i>
+			<span>Menu</span>
+		</a>
+	`;
+
+	// Criar o menu lateral com itens secundários
+	const mobileSidebar = document.createElement('div');
+	mobileSidebar.className = 'mobile-sidebar';
+	mobileSidebar.innerHTML = `
+		<div class="mobile-sidebar-header">
+			<h3>Menu</h3>
+			<i class="fas fa-times mobile-sidebar-close" onclick="toggleMobileSidebar()"></i>
+		</div>
+		<div class="mobile-sidebar-content">
+			<a href="#" class="nav-item" data-page="settings">
+				<i class="fas fa-cog"></i>
+				Configurações
+			</a>
+			<a href="#" class="nav-item" data-page="categories">
+				<i class="fas fa-tags"></i>
+				Categorias
+			</a>
+			<a href="#" class="nav-item" data-page="reports">
+				<i class="fas fa-chart-bar"></i>
+				Relatórios
+			</a>
+			<button class="btn-logout" onclick="handleLogout()">
+				<i class="fas fa-sign-out-alt"></i>
+				Sair
+			</button>
+		</div>
+	`;
+
+	// Criar o overlay
+	const overlay = document.createElement('div');
+	overlay.className = 'mobile-menu-overlay';
+	overlay.onclick = () => toggleMobileSidebar();
+
+	// Adicionar elementos ao body apenas em dispositivos móveis
+	if (window.innerWidth <= 768) {
+		document.body.appendChild(mobileNav);
+		document.body.appendChild(mobileSidebar);
+		document.body.appendChild(overlay);
+	}
+
+	// Adicionar listeners para os itens de navegação
+	document.querySelectorAll('.mobile-nav-item[data-page], .mobile-sidebar-content .nav-item[data-page]').forEach(item => {
+		item.addEventListener('click', (e) => {
+			e.preventDefault();
+			const page = e.currentTarget.dataset.page;
+			showPage(page);
+			
+			// Atualizar item ativo na barra inferior
+			document.querySelectorAll('.mobile-nav-item').forEach(nav => nav.classList.remove('active'));
+			if (e.currentTarget.classList.contains('mobile-nav-item')) {
+				e.currentTarget.classList.add('active');
+			}
+
+			// Fechar o menu lateral se o item clicado estiver nele
+			if (e.currentTarget.closest('.mobile-sidebar')) {
+				toggleMobileSidebar();
+			}
+		});
+	});
+}
+
+function toggleMobileSidebar() {
+	const sidebar = document.querySelector('.mobile-sidebar');
+	const overlay = document.querySelector('.mobile-menu-overlay');
+	
+	if (sidebar.classList.contains('active')) {
+		sidebar.classList.remove('active');
+		overlay.classList.remove('active');
+	} else {
+		sidebar.classList.add('active');
+		overlay.classList.add('active');
+	}
 }
