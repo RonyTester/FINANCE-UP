@@ -15,9 +15,6 @@
 	--sidebar-bg: #2d3436;
 	--card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	--modal-overlay: rgba(0, 0, 0, 0.5);
-	--mobile-sidebar-bg: #ffffff;
-	--mobile-sidebar-text: #2d3436;
-	--mobile-sidebar-border: #e9ecef;
 }
 
 [data-theme="dark"] {
@@ -36,9 +33,6 @@
 	--sidebar-bg: #2d3436;
 	--card-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 	--modal-overlay: rgba(0, 0, 0, 0.5);
-	--mobile-sidebar-bg: #2d3436;
-	--mobile-sidebar-text: #ffffff;
-	--mobile-sidebar-border: #4a4a4a;
 }
 
 /* Base styles */
@@ -422,71 +416,9 @@ body {
 	transform: scale(1.1);
 }
 
-.expense-actions {
-	display: flex;
-	gap: 0.5rem;
-	align-items: center;
-	margin-left: 1rem;
-	padding: 0.5rem;
-	border-radius: 0.5rem;
-}
-
-.expense-actions .btn-sm {
-	width: 32px;
-	height: 32px;
-	padding: 6px;
-	border-radius: 4px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border: none;
-	cursor: pointer;
-	transition: all 0.3s ease;
-	background-color: transparent;
-}
-
-.expense-actions .pay-btn {
-	color: var(--success-color);
-}
-
-.expense-actions .pay-btn:hover {
-	background-color: rgba(46, 204, 113, 0.1);
-}
-
-.expense-actions .delete-btn {
-	color: var(--danger-color);
-}
-
-.expense-actions .delete-btn:hover {
-	background-color: rgba(231, 76, 60, 0.1);
-}
-
-@media (max-width: 768px) {
-	.expense-actions {
-		position: static;
-		display: flex;
-		flex-direction: row;
-		gap: 0.5rem;
-		margin-left: 0.5rem;
-		padding: 0;
-	}
-
-	.expense-actions .btn-sm {
-		width: 28px;
-		height: 28px;
-		padding: 4px;
-	}
-
-	.expense-amount-wrapper {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-}
-
-/* Modal */
+/* Estilos Base do Modal */
 .modal {
-	display: none;
+	display: none; /* Começa oculto por padrão */
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -510,7 +442,8 @@ body {
 	max-width: 500px;
 	box-shadow: var(--card-shadow);
 	position: relative;
-	margin: 1rem;
+	transform: translateY(100%);
+	transition: transform 0.3s ease-out;
 }
 
 .modal-header {
@@ -521,16 +454,11 @@ body {
 }
 
 .close-modal {
-	position: absolute;
-	right: 1rem;
-	top: 1rem;
-	padding: 0.5rem;
-	font-size: 1.5rem;
-	color: var(--text-secondary);
 	background: none;
 	border: none;
+	font-size: 1.5rem;
+	color: var(--text-secondary);
 	cursor: pointer;
-	z-index: 1;
 }
 
 /* Formulários */
@@ -545,8 +473,7 @@ body {
 }
 
 .form-group input,
-.form-group select,
-.form-group textarea {
+.form-group select {
 	width: 100%;
 	padding: 0.75rem;
 	border: 1px solid var(--border-color);
@@ -557,8 +484,7 @@ body {
 }
 
 .form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.form-group select:focus {
 	outline: none;
 	border-color: var(--primary-color);
 }
@@ -607,60 +533,79 @@ body {
 	opacity: 0.9;
 }
 
-.btn-sm {
-	padding: 0.5rem;
-	font-size: 0.9rem;
-	min-width: 36px;
-	height: 36px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
 /* Responsividade */
 @media (max-width: 768px) {
-	body {
-		position: fixed;
-		width: 100%;
-		height: 100%;
-		overflow-x: hidden;
-	}
-
-	.wrapper {
-		padding-left: 0;
-		padding-bottom: 60px;
-	}
-
+	/* Esconder a sidebar original */
 	.sidebar {
 		display: none;
 	}
 
+	/* Ajustar o wrapper para tela cheia */
+	.wrapper {
+		padding-left: 0;
+		padding-bottom: 60px; /* Espaço para a navegação inferior */
+	}
+
 	.main-content {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 60px;
 		padding: 1rem;
 		padding-bottom: 5rem;
 		width: 100%;
-		overflow-y: auto;
-		-webkit-overflow-scrolling: touch;
+		overflow-x: hidden;
 	}
 
-	.page-header {
-		position: relative;
-		padding-top: 4rem;
-		margin-bottom: 1rem;
+	/* Ajustes do menu mobile */
+	.mobile-nav {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: var(--bg-secondary);
+		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+		z-index: 1000;
+		padding: 0.5rem;
+		display: flex;
+		justify-content: space-around;
+	}
+
+	/* Estilo para o menu lateral */
+	.mobile-sidebar-content {
+		display: flex;
 		flex-direction: column;
-		align-items: flex-start;
-		gap: 0.5rem;
+		gap: 1rem;
 	}
 
-	.page-header h2 {
-		font-size: 1.25rem;
+	.mobile-sidebar-content .nav-item {
+		color: var(--text-primary);
+		text-decoration: none;
+		padding: 0.75rem 1rem;
+		border-radius: 0.5rem;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		transition: background-color 0.3s ease;
 	}
 
+	.mobile-sidebar-content .nav-item:hover {
+		background-color: rgba(0, 0, 0, 0.05);
+	}
+
+	.mobile-sidebar-content .nav-item i {
+		width: 1.5rem;
+		text-align: center;
+		font-size: 1.1rem;
+	}
+
+	.mobile-sidebar-content .btn-logout {
+		margin-top: auto;
+		width: 100%;
+	}
+
+	.main-content {
+		padding: 1rem;
+		width: 100%;
+	}
+
+	/* Ajustes no Dashboard */
 	.dashboard-grid {
 		grid-template-columns: repeat(2, 1fr);
 		gap: 0.75rem;
@@ -685,147 +630,111 @@ body {
 		font-size: 1rem;
 	}
 
+	/* Ajustes nos Gráficos */
 	.charts-container {
 		grid-template-columns: 1fr;
 		gap: 1rem;
 	}
 
+	.chart-card {
+		padding: 1rem;
+	}
+
 	.chart-wrapper {
 		height: 250px;
-		margin: 0 -1rem;
-		padding: 0 1rem;
-		overflow-x: auto;
 	}
 
-	.modal {
-		padding: 0;
-	}
-
-	.modal-content {
-		margin: 0;
-		width: 100%;
-		border-radius: 1.25rem 1.25rem 0 0;
-		padding: 1.25rem;
-		transition: transform 0.3s ease-out;
-	}
-
-	.modal.active .modal-content {
-		transform: translateY(0);
-	}
-
-	.modal-header {
-		padding-right: 2rem;
-	}
-
-	.close-modal {
-		position: absolute;
-		right: 1rem;
-		top: 1rem;
-		padding: 0.5rem;
-		font-size: 1.5rem;
-		color: var(--text-secondary);
-		background: none;
-		border: none;
-		cursor: pointer;
-		z-index: 1;
-	}
-
-	#notifications-container {
-		left: 0.5rem;
-		right: 0.5rem;
-		bottom: 70px;
-		top: auto;
-	}
-
-	.notification {
-		width: 100%;
-		min-width: 0;
-		max-width: none;
+	/* Ajustes nas Transações */
+	.transactions-filters {
+		grid-template-columns: 1fr;
+		gap: 0.75rem;
 		padding: 0.75rem;
 	}
 
-	.mobile-nav {
-		position: fixed;
+	.transactions-filters input,
+	.transactions-filters select,
+	#periodSelect {
+		padding: 0.6rem 0.875rem;
+		font-size: 0.9rem;
+	}
+
+	.transaction-item {
+		padding: 0.75rem 1rem;
+	}
+
+	.transaction-info strong {
+		font-size: 1rem;
+	}
+
+	.transaction-info div {
+		font-size: 0.8rem;
+	}
+
+	.transaction-amount {
+		font-size: 1rem;
+	}
+
+	/* Ajustes no Modal */
+	.modal-content {
+		margin: 0;
+		border-radius: 1.25rem 1.25rem 0 0;
+		max-height: 90vh;
+		overflow-y: auto;
+	}
+
+	.modal.active {
+		align-items: flex-end;
+	}
+
+	/* Botões do Modal */
+	.modal .form-actions {
+		position: sticky;
 		bottom: 0;
 		left: 0;
 		right: 0;
-		height: 60px;
-		background: var(--bg-secondary);
-		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-		z-index: 1000;
-		padding: 0.5rem 1rem;
+		background: var(--bg-primary);
+		padding: 1rem;
+		margin: 1rem -1.5rem -1.5rem;
+		border-top: 1px solid var(--border-color);
 		display: flex;
-		justify-content: space-around;
-		backdrop-filter: blur(10px);
+		gap: 0.75rem;
+		z-index: 10;
 	}
 
-	.mobile-nav-item {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 0.25rem;
-		color: var(--text-secondary);
-		text-decoration: none;
-		font-size: 0.8rem;
-		transition: color 0.3s ease;
+	.modal .form-actions .btn {
+		flex: 1;
+		min-height: 48px;
+		justify-content: center;
+		font-size: 1rem;
+		padding: 0.75rem;
 	}
 
-	.mobile-nav-item i {
-		font-size: 1.1rem;
-		margin-bottom: 0.2rem;
-	}
+	/* Ajuste para telas pequenas */
+	@media (max-width: 360px) {
+		.modal-content {
+			padding: 1.25rem;
+		}
 
-	.mobile-nav-item span {
-		font-size: 0.65rem;
-	}
+		.modal .form-actions {
+			padding: 0.75rem;
+			margin: 0.75rem -1.25rem -1.25rem;
+		}
 
-	.mobile-nav-item.active {
-		color: var(--primary-color);
+		.modal .form-actions .btn {
+			min-height: 44px;
+			font-size: 0.9rem;
+		}
 	}
+}
 
-	.mobile-user-info {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		z-index: 100;
-		font-size: 0.9rem;
-		color: var(--text-primary);
-		background: rgba(255, 255, 255, 0.1);
-		padding: 0.75rem 1rem;
-		margin: 0.5rem 1rem;
-		border-radius: 12px;
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-	}
+/* Animações do Modal */
+.modal-content {
+	transform: translateY(100%);
+	transition: transform 0.3s ease-out;
+}
 
-	.mobile-user-info i {
-		font-size: 1.1rem;
-		color: var(--primary-color);
-		opacity: 0.9;
-	}
-
-	.mobile-user-info span {
-		font-weight: 500;
-		max-width: 200px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.btn,
-	.nav-item,
-	.mobile-nav-item,
-	.close-modal,
-	.expense-actions .btn-sm {
-		min-height: 44px;
-		min-width: 44px;
-		-webkit-tap-highlight-color: transparent;
-	}
+.modal.active .modal-content {
+	transform: translateY(0);
 }
 
 /* Ajustes para telas muito pequenas */
@@ -834,16 +743,16 @@ body {
 		grid-template-columns: 1fr;
 	}
 
-	.mobile-nav-item i {
-		font-size: 1rem;
+	.nav-item {
+		font-size: 0.8rem;
 	}
 
-	.mobile-nav-item span {
-		font-size: 0.6rem;
+	.nav-item i {
+		font-size: 1rem;
 	}
 }
 
-/* Suporte para Notch e Safe Areas */
+/* Ajustes para Notch e Safe Areas */
 @supports (padding: max(0px)) {
 	@media (max-width: 768px) {
 		.sidebar {
@@ -965,6 +874,18 @@ body {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
+}
+
+.btn-sm {
+    padding: 0.75rem;
+    font-size: 1rem;
+    min-width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
 }
 
 .account-actions {
@@ -1665,8 +1586,6 @@ body {
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
     transition: all 0.3s ease;
-    position: relative;
-    min-height: 80px;
 }
 
 .fixed-expense-item:last-child {
@@ -1687,7 +1606,6 @@ body {
 
 .expense-info {
     flex: 1;
-    padding-right: 120px;
 }
 
 .expense-info strong {
@@ -1742,90 +1660,131 @@ body {
     color: var(--text-primary);
 }
 
-.expense-amount-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-left: auto;
-}
-
 .expense-actions {
     display: flex;
     gap: 0.5rem;
-    align-items: center;
 }
 
-.edit-btn,
-.delete-btn {
+.expense-actions .btn-sm {
     width: 32px;
     height: 32px;
-    padding: 6px;
-    border-radius: 4px;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: transparent;
 }
 
-.edit-btn {
-    color: var(--primary-color);
+.expense-actions .btn-sm i {
+    pointer-events: none;
 }
 
-.delete-btn {
-    color: var(--danger-color);
+/* Estilos para o Histórico de Pagamentos */
+.payment-history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.edit-btn:hover {
-    background: rgba(9, 132, 227, 0.1);
+.payment-history-item:last-child {
+    border-bottom: none;
 }
 
-.delete-btn:hover {
-    background: rgba(231, 76, 60, 0.1);
+.payment-info {
+    flex: 1;
 }
 
+.payment-info strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.payment-info div {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.payment-info small {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 0.25rem;
+}
+
+/* Responsividade */
 @media (max-width: 768px) {
     .fixed-expense-item {
         padding: 1rem;
-    }
-
-    .expense-info {
-        padding-right: 100px;
-    }
-
-    .expense-amount-wrapper {
-        position: absolute;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        margin-left: 0;
-    }
-
-    .expense-actions {
-        margin-left: 0.5rem;
-    }
-
-    .edit-btn,
-    .delete-btn {
-        width: 28px;
-        height: 28px;
-        padding: 4px;
-    }
-}
-
-@media (max-width: 360px) {
-    .fixed-expense-item {
-        padding: 0.75rem;
-    }
-
-    .expense-info {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        min-height: 100px;
         padding-right: 90px;
     }
 
-    .expense-amount-wrapper {
+    .expense-info {
+        width: 100%;
+    }
+
+    .expense-amount {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .expense-actions {
+        position: absolute;
         right: 0.75rem;
+        top: 2.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .expense-actions .btn-sm {
+        width: 36px;
+        height: 36px;
+    }
+
+    .expense-notes {
+        width: 100%;
+        margin-top: 0.5rem;
+        padding-right: 0;
+    }
+}
+
+/* Ajustes adicionais para telas muito pequenas */
+@media (max-width: 360px) {
+    .fixed-expense-item {
+        padding: 0.75rem;
+        padding-right: 80px;
+    }
+
+    .expense-actions {
+        gap: 0.6rem;
+    }
+
+    .expense-actions .btn-sm {
+        width: 32px;
+        height: 32px;
+    }
+
+    .expense-actions {
+        right: 0.5rem;
+    }
+
+    .mobile-nav-item i {
+        font-size: 1rem;
+    }
+
+    .mobile-nav-item span {
+        font-size: 0.6rem;
     }
 }
 
@@ -1875,12 +1834,11 @@ body {
         right: -280px;
         width: 280px;
         height: 100vh;
-        background: var(--mobile-sidebar-bg);
+        background: var(--bg-secondary);
         box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
         z-index: 1001;
         transition: right 0.3s ease;
         padding: 1rem;
-        border-left: 1px solid var(--mobile-sidebar-border);
     }
 
     .mobile-sidebar.active {
@@ -1893,58 +1851,19 @@ body {
         align-items: center;
         margin-bottom: 1.5rem;
         padding-bottom: 0.5rem;
-        border-bottom: 1px solid var(--mobile-sidebar-border);
+        border-bottom: 1px solid var(--border-color);
     }
 
     .mobile-sidebar-header h3 {
-        color: var(--mobile-sidebar-text);
+        color: var(--text-primary);
         font-size: 1.1rem;
-        font-weight: 600;
     }
 
     .mobile-sidebar-close {
-        color: var(--mobile-sidebar-text);
+        color: var(--text-secondary);
         font-size: 1.2rem;
         padding: 0.5rem;
         cursor: pointer;
-        opacity: 0.8;
-    }
-
-    .mobile-sidebar-close:hover {
-        opacity: 1;
-    }
-
-    .mobile-sidebar .nav-item {
-        color: var(--mobile-sidebar-text);
-        background: transparent;
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-    }
-
-    .mobile-sidebar .nav-item:hover,
-    .mobile-sidebar .nav-item.active {
-        background: rgba(var(--primary-color), 0.1);
-        color: var(--primary-color);
-    }
-
-    .mobile-sidebar .nav-item i {
-        color: inherit;
-        opacity: 0.8;
-    }
-
-    .mobile-sidebar .btn-logout {
-        margin-top: auto;
-        width: 100%;
-        color: var(--danger-color);
-        border: 1px solid var(--danger-color);
-        background: transparent;
-        transition: all 0.3s ease;
-    }
-
-    .mobile-sidebar .btn-logout:hover {
-        background: var(--danger-color);
-        color: white;
     }
 
     .mobile-menu-overlay {
@@ -1985,7 +1904,7 @@ body {
 
     .wrapper {
         padding-left: 0;
-        padding-bottom: 60px;
+        padding-bottom: 60px; /* Espaço para a navegação inferior */
     }
 
     .main-content {
@@ -2049,15 +1968,6 @@ body {
         font-size: 1rem;
         margin-bottom: 0.25rem;
         padding-right: 60px;
-    }
-
-    .expense-amount-wrapper {
-        position: absolute;
-        top: 50%;
-        right: 1rem;
-        transform: translateY(-50%);
-        flex-direction: row;
-        align-items: center;
     }
 
     .expense-amount {
@@ -2213,10 +2123,16 @@ body {
 
     .fixed-expense-item {
         padding: 0.75rem;
+        padding-right: 80px;
     }
 
-    .expense-amount-wrapper {
-        right: 0.75rem;
+    .expense-actions .btn-sm {
+        width: 32px;
+        height: 32px;
+    }
+
+    .expense-actions {
+        right: 0.5rem;
     }
 
     .mobile-nav-item i {
@@ -2257,5 +2173,4 @@ body {
         min-width: 44px;
     }
 }
-
 
