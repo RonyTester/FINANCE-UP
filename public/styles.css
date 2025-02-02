@@ -1631,3 +1631,279 @@ body {
     }
 }
 
+/* Estilos para Despesas Fixas */
+.fixed-expenses-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.progress-card {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+}
+
+.progress-card h3 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+}
+
+.progress-bar {
+    height: 12px;
+    background: var(--bg-primary);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.progress-bar .progress {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 6px;
+    transition: width 0.3s ease;
+}
+
+.progress-info {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.fixed-expenses-list {
+    background: var(--bg-secondary);
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .fixed-expenses-container {
+        gap: 1rem;
+    }
+
+    .progress-card {
+        padding: 1rem;
+    }
+
+    .progress-card h3 {
+        font-size: 1.1rem;
+    }
+
+    .progress-bar {
+        height: 10px;
+    }
+}
+
+/* Estilos para Despesas Fixas */
+.fixed-expenses-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.fixed-expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.fixed-expense-item:last-child {
+    border-bottom: none;
+}
+
+.fixed-expense-item.paid {
+    background-color: rgba(46, 204, 113, 0.1);
+}
+
+.fixed-expense-item.overdue {
+    background-color: rgba(231, 76, 60, 0.1);
+}
+
+.fixed-expense-item.partial {
+    background-color: rgba(241, 196, 15, 0.1);
+}
+
+.expense-info {
+    flex: 1;
+}
+
+.expense-info strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.expense-info div {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.expense-status {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    display: inline-block;
+    margin-top: 0.25rem;
+}
+
+.paid .expense-status {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #27ae60;
+}
+
+.overdue .expense-status {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #c0392b;
+}
+
+.partial .expense-status {
+    background-color: rgba(241, 196, 15, 0.2);
+    color: #d35400;
+}
+
+.expense-notes {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 0.5rem;
+}
+
+.expense-amount {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.expense-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.expense-actions .btn-sm {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.expense-actions .btn-sm i {
+    pointer-events: none;
+}
+
+/* Estilos para o Histórico de Pagamentos */
+.payment-history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.payment-history-item:last-child {
+    border-bottom: none;
+}
+
+.payment-info {
+    flex: 1;
+}
+
+.payment-info strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.payment-info div {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.payment-info small {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 0.25rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .fixed-expense-item {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .expense-amount {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .expense-info strong {
+        font-size: 1rem;
+    }
+
+    .expense-amount {
+        font-size: 1rem;
+    }
+
+    .payment-history-item {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .payment-info {
+        width: 100%;
+    }
+}
+
+.payment-progress {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background-color: var(--bg-primary);
+    border-radius: 0.5rem;
+}
+
+.payment-progress .progress-bar {
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+}
+
+.payment-progress .progress {
+    height: 100%;
+    background-color: #f1c40f;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.payment-progress small {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+.partial .expense-status {
+    background-color: rgba(241, 196, 15, 0.2);
+    color: #d35400;
+}
+
