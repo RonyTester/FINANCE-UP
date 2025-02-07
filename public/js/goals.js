@@ -564,7 +564,17 @@ function showGoalDetails(goalId) {
                                 ${new Date(contrib.date).toLocaleDateString()}
                             </div>
                             <div class="timeline-content">
-                                <span class="amount">+ ${formatCurrency(contrib.amount)}</span>
+                                <div class="timeline-header">
+                                    <span class="amount">+ ${formatCurrency(contrib.amount)}</span>
+                                    <div class="timeline-actions">
+                                        <button onclick="editContribution(${contrib.id})" class="btn btn-sm btn-secondary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="deleteContribution(${contrib.id}, ${goalId})" class="btn btn-sm btn-danger" title="Excluir">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
                                 ${contrib.notes ? `<p class="notes">${contrib.notes}</p>` : ''}
                             </div>
                         </div>
@@ -586,17 +596,70 @@ function closeGoalDetails() {
     }
 }
 
+// Modificar a função updateContributionHistory para preservar os botões
+async function updateContributionHistory(goalId) {
+    try {
+        // Busca as contribuições atualizadas
+        const { data: contributionsData, error: contributionsError } = await supabase
+            .from('goal_contributions')
+            .select('*')
+            .eq('goal_id', goalId)
+            .order('date', { ascending: false });
+
+        if (contributionsError) throw contributionsError;
+
+        // Atualiza o histórico na timeline
+        const timelineContainer = document.querySelector('.contributions-timeline');
+        if (timelineContainer) {
+            timelineContainer.innerHTML = contributionsData.length > 0 ? 
+                contributionsData.map(contrib => `
+                    <div class="timeline-item">
+                        <div class="timeline-date">
+                            <i class="fas fa-circle"></i>
+                            ${new Date(contrib.date).toLocaleDateString()}
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="amount">+ ${formatCurrency(contrib.amount)}</span>
+                                <div class="timeline-actions">
+                                    <button onclick="editContribution(${contrib.id})" class="btn btn-sm btn-secondary" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteContribution(${contrib.id}, ${goalId})" class="btn btn-sm btn-danger" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            ${contrib.notes ? `<p class="notes">${contrib.notes}</p>` : ''}
+                        </div>
+                    </div>
+                `).join('') : 
+                '<p class="no-contributions">Nenhuma contribuição realizada ainda.</p>';
+        }
+
+        // Atualiza o progresso da meta
+        await updateGoalProgress(goalId);
+    } catch (error) {
+        console.error('Erro ao atualizar histórico:', error);
+        showNotification('error', 'Erro', 'Não foi possível atualizar o histórico de contribuições.');
+    }
+}
+
+// Modificar a função handleContributionSubmit
 async function handleContributionSubmit(e) {
     e.preventDefault();
 
     try {
         const amountInput = document.querySelector('#contributionModal #amount');
         const dateInput = document.querySelector('#contributionModal #date');
+        const notesInput = document.querySelector('#contributionModal #notes');
+        const goalId = parseInt(document.querySelector('#contributionModal #goalId').value);
 
         const formData = {
-            goal_id: parseInt(document.querySelector('#contributionModal #goalId').value),
+            goal_id: goalId,
             amount: Number(amountInput.value.trim().replace(',', '.')),
-            date: dateInput.value, // Volta para o formato simples
+            date: dateInput.value,
+            notes: notesInput.value,
             user_id: currentUser.id
         };
 
@@ -608,12 +671,180 @@ async function handleContributionSubmit(e) {
 
         if (error) throw error;
 
-        showNotification('success', 'Sucesso', 'Contribuição adicionada com sucesso!');
+        // Fecha o modal e limpa o formulário primeiro
         document.getElementById('contributionModal').classList.remove('active');
         document.getElementById('contributionForm').reset();
-        await loadGoals();
+
+        // Depois atualiza os dados
+        await updateContributionHistory(goalId);
+        await loadGoals(); // Atualiza a lista geral de metas uma única vez
+        
+        showNotification('success', 'Sucesso', 'Contribuição adicionada com sucesso!');
     } catch (error) {
         console.error('Erro ao adicionar contribuição:', error);
         showNotification('error', 'Erro', error.message || 'Erro ao adicionar contribuição. Por favor, tente novamente.');
+    }
+}
+
+// Função para atualizar o progresso da meta
+async function updateGoalProgress(goalId) {
+    try {
+        const goal = goals.find(g => g.id === goalId);
+        if (!goal) return;
+
+        const { data: contributions, error } = await supabase
+            .from('goal_contributions')
+            .select('amount')
+            .eq('goal_id', goalId);
+
+        if (error) throw error;
+
+        const totalContributed = contributions.reduce((sum, contrib) => sum + contrib.amount, 0);
+        const progress = (totalContributed / goal.target_amount) * 100;
+
+        // Atualiza a barra de progresso no painel de detalhes
+        const progressBar = document.querySelector('.goal-details-progress-bar');
+        const progressPercentage = document.querySelector('.goal-details-progress-percentage');
+        
+        if (progressBar) {
+            progressBar.style.width = `${progress}%`;
+        }
+        if (progressPercentage) {
+            progressPercentage.textContent = `${progress.toFixed(1)}%`;
+        }
+
+        // Atualiza o valor acumulado
+        const accumulatedElement = document.querySelector('.goal-details-info .info-item:nth-child(2) strong');
+        if (accumulatedElement) {
+            accumulatedElement.textContent = formatCurrency(totalContributed);
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar progresso:', error);
+    }
+} 
+
+// Função para excluir contribuição
+async function deleteContribution(contributionId, goalId) {
+    try {
+        const confirmed = await showConfirmation(
+            'Excluir Contribuição',
+            'Tem certeza que deseja excluir esta contribuição? Esta ação não pode ser desfeita.'
+        );
+
+        if (!confirmed) return;
+
+        const { error } = await supabase
+            .from('goal_contributions')
+            .delete()
+            .eq('id', contributionId);
+
+        if (error) throw error;
+
+        // Atualizar o histórico e o progresso
+        await updateContributionHistory(goalId);
+        await loadGoals();
+        
+        showNotification('success', 'Sucesso', 'Contribuição excluída com sucesso!');
+    } catch (error) {
+        console.error('Erro ao excluir contribuição:', error);
+        showNotification('error', 'Erro', 'Não foi possível excluir a contribuição.');
+    }
+}
+
+// Função para abrir o modal de edição
+async function editContribution(contributionId) {
+    try {
+        // Buscar os dados da contribuição
+        const { data: contribution, error } = await supabase
+            .from('goal_contributions')
+            .select('*')
+            .eq('id', contributionId)
+            .single();
+
+        if (error) throw error;
+
+        // Preencher o modal de edição
+        document.getElementById('editContributionId').value = contribution.id;
+        document.getElementById('editContributionAmount').value = contribution.amount;
+        document.getElementById('editContributionDate').value = contribution.date.split('T')[0];
+        document.getElementById('editContributionNotes').value = contribution.notes || '';
+        document.getElementById('editContributionGoalId').value = contribution.goal_id;
+
+        // Armazenar o ID da meta para reabrir o painel depois
+        sessionStorage.setItem('lastOpenGoalId', contribution.goal_id);
+
+        // Fechar o painel de detalhes no mobile antes de abrir o modal
+        if (window.innerWidth <= 768) {
+            const panel = document.getElementById('goalDetailsPanel');
+            if (panel) {
+                panel.classList.remove('active');
+                setTimeout(() => panel.remove(), 300);
+            }
+        }
+
+        // Mostrar o modal
+        toggleEditContributionModal(true);
+    } catch (error) {
+        console.error('Erro ao carregar contribuição:', error);
+        showNotification('error', 'Erro', 'Não foi possível carregar os dados da contribuição.');
+    }
+}
+
+// Função para salvar a edição
+async function handleEditContributionSubmit(e) {
+    e.preventDefault();
+
+    try {
+        const contributionId = document.getElementById('editContributionId').value;
+        const goalId = document.getElementById('editContributionGoalId').value;
+        
+        const formData = {
+            amount: Number(document.getElementById('editContributionAmount').value),
+            date: document.getElementById('editContributionDate').value,
+            notes: document.getElementById('editContributionNotes').value
+        };
+
+        const { error } = await supabase
+            .from('goal_contributions')
+            .update(formData)
+            .eq('id', contributionId);
+
+        if (error) throw error;
+
+        // Fechar o modal
+        toggleEditContributionModal(false);
+
+        // Atualizar a interface
+        await updateContributionHistory(goalId);
+        await loadGoals();
+
+        // Reabrir o painel de detalhes no mobile
+        if (window.innerWidth <= 768) {
+            const lastGoalId = sessionStorage.getItem('lastOpenGoalId');
+            if (lastGoalId) {
+                setTimeout(() => {
+                    showGoalDetails(lastGoalId);
+                    sessionStorage.removeItem('lastOpenGoalId');
+                }, 300);
+            }
+        }
+
+        showNotification('success', 'Sucesso', 'Contribuição atualizada com sucesso!');
+    } catch (error) {
+        console.error('Erro ao atualizar contribuição:', error);
+        showNotification('error', 'Erro', 'Não foi possível atualizar a contribuição.');
+    }
+}
+
+// Função para controlar a visibilidade do modal de edição
+function toggleEditContributionModal(show) {
+    const modal = document.getElementById('editContributionModal');
+    if (!modal) return;
+
+    if (show) {
+        modal.classList.add('active');
+    } else {
+        modal.classList.remove('active');
+        document.getElementById('editContributionForm').reset();
     }
 } 

@@ -530,6 +530,36 @@
 	<!-- Container de Notificações -->
 	<div id="notifications-container"></div>
 
+	<!-- Modal de Edição de Contribuição -->
+	<div id="editContributionModal" class="modal">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Editar Contribuição</h3>
+				<button class="close-modal" onclick="toggleEditContributionModal(false)">&times;</button>
+			</div>
+			<form id="editContributionForm" onsubmit="handleEditContributionSubmit(event)">
+				<input type="hidden" id="editContributionId">
+				<input type="hidden" id="editContributionGoalId">
+				<div class="form-group">
+					<label for="editContributionAmount">Valor</label>
+					<input type="number" id="editContributionAmount" step="0.01" required>
+				</div>
+				<div class="form-group">
+					<label for="editContributionDate">Data</label>
+					<input type="date" id="editContributionDate" required>
+				</div>
+				<div class="form-group">
+					<label for="editContributionNotes">Observações</label>
+					<textarea id="editContributionNotes" rows="3"></textarea>
+				</div>
+				<div class="form-actions">
+					<button type="button" class="btn btn-secondary" onclick="toggleEditContributionModal(false)">Cancelar</button>
+					<button type="submit" class="btn btn-primary">Salvar</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
 	<!-- Scripts -->
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
