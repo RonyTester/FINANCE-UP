@@ -1252,4 +1252,406 @@
     padding: 1.5rem;
     text-align: center;
     color: rgba(255, 255, 255, 0.7);
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+}
+
+.timeline-actions .btn-sm {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.timeline-actions .btn-sm i {
+    font-size: 0.9rem;
+    transition: transform 0.2s ease;
+}
+
+.timeline-actions .btn-sm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-actions .btn-sm:active {
+    transform: scale(0.95);
+}
+
+/* Ajustes no layout do card de contribuição para mobile */
+@media (max-width: 768px) {
+    .timeline-item {
+        position: relative;
+        padding-bottom: 40px; /* Espaço para os botões */
+    }
+
+    .timeline-content {
+        position: relative;
+        width: 100%;
+    }
+
+    /* Ajuste no valor para garantir que não seja sobreposto */
+    .timeline-content .amount {
+        display: block;
+        margin-right: 8px;
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+    }
+
+    /* Reposicionamento dos botões */
+    .timeline-actions {
+        position: absolute;
+        bottom: 8px; /* Distância da borda inferior */
+        right: 8px;
+        transform: none; /* Remove transformação anterior */
+        display: flex;
+        gap: 8px;
+        padding: 4px;
+        background: transparent;
+        z-index: 5;
+    }
+
+    /* Ajustes nos botões */
+    .timeline-actions .btn-sm {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        position: relative;
+        isolation: isolate; /* Cria novo contexto de empilhamento */
+        overflow: visible; /* Permite que o pseudo-elemento ultrapasse */
+    }
+
+    /* Área de toque expandida para Android */
+    .timeline-actions .btn-sm::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        bottom: -10px;
+        left: -10px;
+        z-index: -1;
+        cursor: pointer;
+    }
+
+    /* Estilo específico para o botão de edição */
+    .timeline-actions .btn-sm.btn-secondary {
+        background: rgba(var(--primary-rgb), 0.1);
+        color: var(--primary-color);
+        -webkit-tap-highlight-color: transparent;
+        cursor: pointer !important;
+        pointer-events: auto !important;
+    }
+
+    /* Estilo específico para o botão de exclusão */
+    .timeline-actions .btn-sm.btn-danger {
+        background: rgba(var(--danger-color), 0.1);
+        color: var(--danger-color);
+    }
+
+    /* Ícones dentro dos botões */
+    .timeline-actions .btn-sm i {
+        font-size: 1rem;
+        pointer-events: none; /* Evita problemas de evento no ícone */
+    }
+
+    /* Feedback visual ao pressionar */
+    .timeline-actions .btn-sm:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+}
+
+/* Correções específicas para Android */
+@supports (-webkit-appearance: none) {
+    @media (max-width: 768px) {
+        .timeline-actions .btn-sm {
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        /* Força a interatividade no botão de edição */
+        .timeline-actions .btn-sm.btn-secondary {
+            position: relative;
+            z-index: 100; /* Valor alto para garantir que fique acima */
+            transform: translateZ(0); /* Força hardware acceleration */
+            will-change: transform; /* Otimiza performance */
+        }
+
+        /* Área de toque maior sem afetar visual */
+        .timeline-actions .btn-sm.btn-secondary::after {
+            content: '';
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            bottom: -15px;
+            left: -15px;
+            z-index: 1;
+        }
+    }
+}
+
+/* Ajustes para telas muito pequenas */
+@media (max-width: 360px) {
+    .timeline-item {
+        padding-bottom: 36px; /* Reduz um pouco o espaço */
+    }
+
+    .timeline-actions .btn-sm {
+        width: 32px;
+        height: 32px;
+    }
+
+    .timeline-actions {
+        bottom: 6px;
+        right: 6px;
+        gap: 6px;
+    }
+}
+
+/* Correções específicas para garantir clique em dispositivos touch */
+@supports (-webkit-touch-callout: none) {
+    .timeline-actions .btn-sm {
+        -webkit-tap-highlight-color: transparent;
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+}
+
+/* Correção específica para Android */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .timeline-actions .btn-sm {
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        cursor: pointer;
+    }
+}
+
+/* Ajustes específicos para o botão de edição no Android */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .timeline-actions .btn-sm.btn-secondary {
+        /* Força o botão a ser clicável */
+        position: relative;
+        z-index: 200;
+        pointer-events: all !important;
+        cursor: pointer !important;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        /* Remove qualquer transformação que possa interferir */
+        transform: none !important;
+        /* Garante que o botão fique acima de outros elementos */
+        isolation: isolate;
+    }
+
+    /* Aumenta a área de clique sem afetar o visual */
+    .timeline-actions .btn-sm.btn-secondary::before {
+        content: '';
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        bottom: -12px;
+        left: -12px;
+        z-index: -1;
+        background: transparent;
+    }
+
+    /* Garante que o ícone dentro do botão não interfira no clique */
+    .timeline-actions .btn-sm.btn-secondary i {
+        pointer-events: none;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Remove efeitos que possam interferir no clique */
+    .timeline-actions .btn-sm.btn-secondary:hover,
+    .timeline-actions .btn-sm.btn-secondary:focus {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Feedback visual mais simples ao tocar */
+    .timeline-actions .btn-sm.btn-secondary:active {
+        opacity: 0.7;
+    }
+}
+
+/* Correção adicional para Samsung Internet e outros navegadores Android */
+@supports (-webkit-touch-callout: none) {
+    .timeline-actions .btn-sm.btn-secondary {
+        /* Força o botão a ser interativo */
+        pointer-events: auto !important;
+        cursor: pointer !important;
+        /* Previne comportamentos indesejados do navegador */
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+/* Ajuste para garantir que o evento de clique funcione em todos os elementos do botão */
+.timeline-actions .btn-sm.btn-secondary * {
+    pointer-events: none;
+}
+
+/* Estilos para o modal de edição de contribuição */
+#editContributionModal .modal-content {
+    background: var(--bg-secondary);
+    border-radius: 24px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
+    position: relative;
+    margin: 1rem auto;
+    padding: 1.5rem;
+}
+
+#editContributionModal .modal-header {
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+    padding: 1.5rem;
+    border-radius: 24px 24px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#editContributionModal .modal-header h3 {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+#editContributionModal .close-modal {
+    color: rgba(255, 255, 255, 0.8);
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+#editContributionModal .close-modal:hover {
+    color: white;
+    transform: rotate(90deg);
+}
+
+#editContributionModal .form-group {
+    margin-bottom: 1.25rem;
+}
+
+#editContributionModal .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+#editContributionModal .form-group input,
+#editContributionModal .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+#editContributionModal .form-group input:focus,
+#editContributionModal .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
+}
+
+#editContributionModal .form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+#editContributionModal .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+#editContributionModal .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#editContributionModal .btn:hover {
+    transform: translateY(-2px);
+}
+
+#editContributionModal .btn-secondary {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1.5px solid var(--border-color);
+}
+
+#editContributionModal .btn-primary {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    #editContributionModal .modal-content {
+        width: 95%;
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    #editContributionModal .form-actions {
+        flex-direction: column;
+    }
+
+    #editContributionModal .btn {
+        width: 100%;
+    }
+
+    #editContributionModal .form-group input,
+    #editContributionModal .form-group textarea {
+        font-size: 16px;
+    }
+}
+
+/* Ajustes para tema escuro */
+[data-theme="dark"] #editContributionModal .modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] #editContributionModal .btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
 } 
