@@ -6,6 +6,7 @@
 	<title>Finance - Controle Financeiro</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 	<link rel="stylesheet" href="styles.css">
+	<link rel="stylesheet" href="css/goals.css">
 </head>
 <body>
 	<div class="wrapper">
@@ -23,6 +24,10 @@
 				<a href="#" class="nav-item active" data-page="dashboard">
 					<i class="fas fa-chart-line"></i>
 					Dashboard
+				</a>
+				<a href="#" class="nav-item" data-page="goals">
+					<i class="fas fa-bullseye"></i>
+					Metas
 				</a>
 				<a href="#" class="nav-item" data-page="fixed-expenses">
 					<i class="fas fa-calendar-check"></i>
@@ -175,6 +180,23 @@
 
 						<div class="fixed-expenses-list" id="fixedExpensesList">
 							<!-- Lista de despesas fixas será preenchida via JavaScript -->
+						</div>
+					</div>
+				</section>
+
+				<!-- Goals -->
+				<section id="goals-page" class="page">
+					<div class="page-header">
+						<h2>Minhas Metas</h2>
+						<button id="newGoalBtn" class="btn btn-primary">
+							<i class="fas fa-plus"></i>
+							Nova Meta
+						</button>
+					</div>
+
+					<div class="goals-container">
+						<div class="goals-list" id="goalsList">
+							<!-- Metas serão inseridas aqui via JavaScript -->
 						</div>
 					</div>
 				</section>
@@ -418,6 +440,93 @@
 		</div>
 	</div>
 
+	<!-- Modal Nova Meta -->
+	<div id="goalModal" class="modal">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Nova Meta</h3>
+				<button class="close-modal" onclick="toggleGoalModal(false)">&times;</button>
+			</div>
+			
+			<div class="modal-tabs">
+				<button class="tab-btn active" data-target="#basicInfo">Informações Básicas</button>
+				<button class="tab-btn" data-target="#notifications">Notificações</button>
+			</div>
+
+			<div class="tab-content">
+				<div id="basicInfo" class="tab-pane active">
+					<div class="form-group">
+						<label for="goalName">Nome da Meta</label>
+						<input type="text" id="goalName" required>
+					</div>
+					<div class="form-group">
+						<label for="targetAmount">Valor Alvo</label>
+						<input type="number" id="targetAmount" required>
+					</div>
+					<div class="form-group">
+						<label for="deadline">Data Limite</label>
+						<input type="date" id="deadline" required>
+					</div>
+				</div>
+
+				<div id="notifications" class="tab-pane">
+					<div class="form-group">
+						<label for="notificationType">Tipo de Notificação</label>
+						<select id="notificationType" required>
+							<option value="notify">Apenas Notificar</option>
+							<option value="postpone">Adiar Automaticamente</option>
+							<option value="auto_adjust">Ajustar Meta Automaticamente</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="notificationDays">Dias para Notificação</label>
+						<input type="number" id="notificationDays" min="1" value="7">
+						<small>Quantos dias antes do vencimento você quer ser notificado?</small>
+					</div>
+					<div id="postponeDaysGroup" class="form-group" style="display: none;">
+						<label for="postponeDays">Dias para Adiar</label>
+						<input type="number" id="postponeDays" min="1" value="30">
+						<small>Caso a meta não seja atingida, por quantos dias ela deve ser adiada?</small>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" onclick="toggleGoalModal(false)">Cancelar</button>
+				<button type="button" class="btn btn-primary" onclick="handleGoalSubmit(event)">Salvar</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal Contribuição -->
+	<div id="contributionModal" class="modal">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Nova Contribuição</h3>
+				<button class="close-modal">&times;</button>
+			</div>
+			<form id="contributionForm">
+				<input type="hidden" id="goalId">
+				<div class="form-group">
+					<label for="amount">Valor da Contribuição</label>
+					<input type="number" id="amount" step="0.01" required>
+				</div>
+				<div class="form-group">
+					<label for="date">Data</label>
+					<input type="date" id="date" required>
+				</div>
+				<div class="form-group">
+					<label for="notes">Observações</label>
+					<textarea id="notes" rows="3"></textarea>
+				</div>
+				<div class="form-actions">
+					<button type="button" class="btn btn-secondary cancel-modal">Cancelar</button>
+					<button type="submit" class="btn btn-primary">Salvar</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
 	<!-- Container de Notificações -->
 	<div id="notifications-container"></div>
 
@@ -432,5 +541,6 @@
 	</script>
 	<script src="mobile-modal.js"></script>
 	<script src="script.js"></script>
+	<script src="js/goals.js"></script>
 </body>
 </html>

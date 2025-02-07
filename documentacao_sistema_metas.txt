@@ -1,0 +1,241 @@
+# Documentação Detalhada - Sistema de Metas
+
+## 1. Estrutura Principal da Tela
+
+### Cabeçalho
+- Título "Minhas Metas" alinhado à esquerda
+- Botão "Nova Meta" alinhado à direita
+- Fundo em tom escuro (#2D3339)
+- Padding: 20px
+- Fonte: Inter, sans-serif
+
+### Cards de Estatísticas
+Quatro cards informativos no topo:
+1. **Total de Metas**
+   - Ícone circular azul
+   - Número grande centralizado
+   - Label abaixo do número
+
+2. **Metas Concluídas**
+   - Ícone de check verde
+   - Contador numérico
+   - Animação ao concluir meta
+
+3. **Progresso Geral**
+   - Ícone de gráfico
+   - Porcentagem com 1 casa decimal
+   - Atualização em tempo real
+
+4. **Total Acumulado**
+   - Ícone de cofrinho
+   - Valor em R$ formatado
+   - Animação ao aumentar valor
+
+## 2. Cards de Metas
+
+### Estrutura do Card
+.meta-card {
+    background: rgba(44, 51, 58, 0.8);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 10px 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.meta-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+### Funcionalidades do Card
+class MetaCard {
+    constructor(meta) {
+        this.meta = meta;
+        this.element = null;
+        this.progress = 0;
+    }
+
+    atualizarProgresso(valor) {
+        this.progress = (valor / this.meta.valor) * 100;
+        this.atualizarUI();
+        
+        if (this.progress >= 100) {
+            this.concluirMeta();
+        }
+    }
+
+    concluirMeta() {
+        // Dispara notificação
+        NotificationService.show({
+            type: 'success',
+            message: 'Meta concluída com sucesso!'
+        });
+        
+        // Atualiza estatísticas
+        StatisticsManager.updateStats();
+        
+        // Adiciona classe visual
+        this.element.classList.add('meta-concluida');
+    }
+}
+
+## 3. Sistema de Notificações
+
+class NotificationService {
+    static show(config) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${config.type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="notification-icon ${this.getIcon(config.type)}"></i>
+                <span>${config.message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+    
+    static getIcon(type) {
+        const icons = {
+            success: 'check-circle',
+            error: 'alert-circle',
+            warning: 'alert-triangle',
+            info: 'info'
+        };
+        return icons[type];
+    }
+}
+
+## 4. Modais
+
+### Modal Nova Meta
+class NovaMetaModal {
+    constructor() {
+        this.modal = null;
+        this.form = null;
+    }
+
+    show() {
+        this.modal = document.createElement('div');
+        this.modal.className = 'modal nova-meta-modal';
+        this.modal.innerHTML = `
+            <div class="modal-content">
+                <h2>Nova Meta</h2>
+                <form id="nova-meta-form">
+                    <input type="text" name="titulo" placeholder="Título da meta">
+                    <input type="number" name="valor" placeholder="Valor (R$)">
+                    <input type="date" name="prazo">
+                    <button type="submit">Criar Meta</button>
+                </form>
+            </div>
+        `;
+        
+        document.body.appendChild(this.modal);
+        this.setupListeners();
+    }
+
+    setupListeners() {
+        this.form = this.modal.querySelector('form');
+        this.form.addEventListener('submit', this.handleSubmit.bind(this));
+    }
+
+    handleSubmit(e) {
+        e.preventDefault();
+        // Lógica de criação da meta
+    }
+}
+
+## 5. Sistema de Progresso
+
+class ProgressManager {
+    static calcularProgressoGeral() {
+        const metas = MetasRepository.getAll();
+        let progressoTotal = 0;
+        
+        metas.forEach(meta => {
+            progressoTotal += (meta.valorAcumulado / meta.valorMeta) * 100;
+        });
+        
+        return (progressoTotal / metas.length).toFixed(1);
+    }
+
+    static atualizarBarraProgresso(metaId, valor) {
+        const meta = document.querySelector(`#meta-${metaId} .progress-bar`);
+        const porcentagem = (valor * 100).toFixed(1);
+        
+        meta.style.width = `${porcentagem}%`;
+        meta.setAttribute('aria-valuenow', porcentagem);
+    }
+}
+
+## 6. Histórico de Contribuições
+
+class HistoricoManager {
+    static adicionarContribuicao(metaId, valor, data) {
+        const contribuicao = {
+            id: Date.now(),
+            metaId,
+            valor,
+            data,
+            tipo: 'entrada'
+        };
+        
+        this.salvarContribuicao(contribuicao);
+        this.atualizarListaHistorico();
+    }
+
+    static atualizarListaHistorico() {
+        const historicoElement = document.querySelector('.historico-lista');
+        const contribuicoes = this.getContribuicoes();
+        
+        historicoElement.innerHTML = contribuicoes.map(c => `
+            <div class="historico-item ${c.tipo}">
+                <span class="data">${this.formatarData(c.data)}</span>
+                <span class="valor">R$ ${c.valor.toFixed(2)}</span>
+            </div>
+        `).join('');
+    }
+}
+
+## 7. Estilos Principais
+
+/* Variáveis de cores */
+:root {
+    --primary-color: #4A90E2;
+    --success-color: #27AE60;
+    --warning-color: #F2C94C;
+    --danger-color: #EB5757;
+    --background-dark: #2D3339;
+    --card-background: rgba(44, 51, 58, 0.8);
+}
+
+/* Animações */
+@keyframes slideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .stats-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .meta-card {
+        margin: 10px;
+    }
+}
+
+Esta documentação fornece uma base sólida para replicar o sistema de metas. Cada componente pode ser personalizado conforme necessário, mantendo a estrutura principal e as funcionalidades descritas. 
