@@ -1,0 +1,49 @@
+RELATÓRIO DE ALTERAÇÕES - FINANCE APP
+
+Data: 06/02/2024
+
+1. ESTILIZAÇÃO DOS MODAIS
+- Padronizado o estilo visual de todos os modais seguindo o padrão da página de Metas
+- Ajustado bordas, sombras e gradientes
+- Modais atualizados:
+  * Modal de Nova Transação
+  * Modal de Edição de Transação 
+  * Modal de Despesas Fixas
+  * Modal de Edição de Despesas Fixas
+  * Modal de Pagamento de Despesas Fixas
+
+2. AJUSTES NAS CAIXAS DE NOTAS
+- Estilizado as textareas de notas em todos os modais
+- Adicionado fundo semi-transparente
+- Ajustado cores e transições
+- Melhorado estados hover/focus
+- Caixas atualizadas:
+  * fixedExpenseNotes
+  * editFixedExpenseNotes
+  * paymentNotes
+
+3. TEMA LIGHT/DARK
+- Adicionado variação do tema light para os modais
+- Ajustado gradientes e cores para modo claro
+- Mantido consistência visual entre os temas
+
+4. MENU MOBILE
+- Removido itens "Categorias" e "Relatórios"
+- Adicionado item "Metas" com ícone bullseye
+- Mantido funcionalidades originais do menu
+- Preservado estrutura de navegação mobile
+
+5. RESPONSIVIDADE
+- Ajustado layout dos modais para mobile
+- Melhorado experiência em diferentes tamanhos de tela
+- Mantido consistência visual em todas as resoluções
+
+6. BARRA DE PROGRESSO
+- Ajustado estilo da barra de progresso em Despesas Fixas
+- Adicionado efeito de shimmer
+- Mantido funcionalidades existentes
+
+Observações:
+- Todas as alterações foram feitas mantendo as funcionalidades originais
+- Foco em melhorar a experiência visual mantendo a usabilidade
+- Código organizado e comentado para fácil manutenção 

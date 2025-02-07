@@ -794,50 +794,53 @@ function showConfirmation(title, message) {
 }
 
 async function handleTransactionSubmit(e) {
-    e.preventDefault();
-    
-    const form = e.target;
-    const type = form.type.value;
-    let amount = parseFloat(form.amount.value);
-    
-    if (type === 'expense') {
-        amount = -Math.abs(amount);
-    }
+	e.preventDefault();
+	
+	const form = e.target;
+	const type = form.type.value;
+	let amount = parseFloat(form.amount.value);
+	
+	if (type === 'expense') {
+		amount = -Math.abs(amount);
+	}
 
-    const transaction = {
-        description: form.description.value,
-        amount,
-        type: type,
-        category: form.category.value,
-        date: form.date.value, // Volta para o formato simples
-        user_id: currentUser.id
-    };
+	const [year, month, day] = form.date.value.split('-');
+	const formattedDate = `${year}-${month}-${day}`;
 
-    try {
-        const { data, error } = await supabase
-            .from('transactions')
-            .insert([transaction])
-            .select()
-            .single();
+	const transaction = {
+		description: form.description.value,
+		amount,
+		type: type,
+		category: form.category.value,
+		date: formattedDate,
+		user_id: currentUser.id
+	};
 
-        if (error) throw error;
+	try {
+		const { data, error } = await supabase
+			.from('transactions')
+			.insert([transaction])
+			.select()
+			.single();
 
-        window.transactions = [data, ...window.transactions];
-        
-        updateUI();
-        updateDashboardUI();
-        updateTransactionsList(window.transactions);
-        updateCharts();
-        updateCards();
-        
-        toggleModal(false);
-        form.reset();
-        
-        showNotification('success', 'Sucesso', 'Transação adicionada com sucesso');
-    } catch (error) {
-        console.error('Erro ao salvar transação:', error);
-        showNotification('error', 'Erro', 'Erro ao salvar transação. Por favor, tente novamente.');
-    }
+		if (error) throw error;
+
+		window.transactions = [data, ...window.transactions];
+		
+		updateUI();
+		updateDashboardUI();
+		updateTransactionsList(window.transactions);
+		updateCharts();
+		updateCards();
+		
+		toggleModal(false);
+		form.reset();
+		
+		showNotification('success', 'Sucesso', 'Transação adicionada com sucesso');
+	} catch (error) {
+		console.error('Erro ao salvar transação:', error);
+		showNotification('error', 'Erro', 'Erro ao salvar transação. Por favor, tente novamente.');
+	}
 }
 
 async function handleSettingsSubmit(e) {
@@ -1874,13 +1877,17 @@ function setupMobileNavigation() {
 			<i class="fas fa-times mobile-sidebar-close" onclick="toggleMobileSidebar()"></i>
 		</div>
 		<div class="mobile-sidebar-content">
-			<a href="#" class="nav-item" data-page="goals">
-				<i class="fas fa-bullseye"></i>
-				Metas
-			</a>
 			<a href="#" class="nav-item" data-page="settings">
 				<i class="fas fa-cog"></i>
 				Configurações
+			</a>
+			<a href="#" class="nav-item" data-page="categories">
+				<i class="fas fa-tags"></i>
+				Categorias
+			</a>
+			<a href="#" class="nav-item" data-page="reports">
+				<i class="fas fa-chart-bar"></i>
+				Relatórios
 			</a>
 			<button class="btn-logout" onclick="handleLogout()">
 				<i class="fas fa-sign-out-alt"></i>
